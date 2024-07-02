@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "data-storage"
+name = "data-store"
 version = "0.1.0"
 description = "A simple data storage library"
 authors = ["Your Name <email@gmail.com>"]
