@@ -1,0 +1,8 @@
+data_store:
+  framework: minio
+  root_bucket: test
+  connection:
+    endpoint: minio:9000
+    access_key: minio
+    secret_key: minio123
+    secure: false
