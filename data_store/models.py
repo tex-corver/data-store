@@ -2,10 +2,10 @@ import dataclasses
 from datetime import datetime
 from typing import IO
 
+
 @dataclasses.dataclass(frozen=True)
 class Bucket:
-    """_summary_
-    """
+    """_summary_"""
 
     name: str
     created_time: datetime
@@ -13,8 +13,7 @@ class Bucket:
 
 @dataclasses.dataclass(frozen=True)
 class ObjectMetadata:
-    """_summary_
-    """
+    """_summary_"""
 
     key: str
     updated_time: datetime
@@ -23,9 +22,7 @@ class ObjectMetadata:
 
 @dataclasses.dataclass(frozen=True)
 class Object:
-    """_summary_
-    """
+    """_summary_"""
 
     body: IO[bytes]
     updated_time: datetime
-

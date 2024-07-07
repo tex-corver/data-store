@@ -1,3 +1,3 @@
-from . import minio_adaper
+from . import minio_adapter
 
-adaper_routers = {"minio": minio_adaper.ObjectStoreComponentFactory}
+adaper_routers = {"minio": minio_adapter.ObjectStoreComponentFactory}

@@ -1,13 +1,12 @@
 import logging
 from collections.abc import Generator
-
 from typing import Any
 
 import utils
-
 from icecream import ic
 
-from . import configurations, models, adapters, abstract
+__all__ = ["ObjectStore"]
+from data_store import abstract, adapters, configurations, models
 
 logger = logging.getLogger(__file__)
 
@@ -16,7 +15,7 @@ DEFAULT_S3_FRAMEWORK = "minio"
 
 class ObjectStore:
     config: configurations.ObjectStoreConfiguration
-    component_factory: abstract.ObjectStoreCompnentFactory
+    component_factory: abstract.ObjectStoreComponentFactory
     client: abstract.ObjectStoreClient
 
     def __init__(self, config: dict[str, Any] = None):
@@ -217,7 +216,7 @@ class ObjectStore:
             **kwargs,
         )
 
-    def __init_component_factory(self) -> abstract.ObjectStoreCompnentFactory:
+    def __init_component_factory(self) -> abstract.ObjectStoreComponentFactory:
         framework = self.config.framework or DEFAULT_S3_FRAMEWORK
         if framework not in adapters.adaper_routers:
             raise ValueError(f"Doesn't support framework: {framework}")

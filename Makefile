@@ -1,5 +1,5 @@
-config_path = $(project_dir)/.configs
 project_dir = $(shell pwd)
+config_path = $(project_dir)/.configs
 
 .PHONY: unit-test
 unit-test:
@@ -11,4 +11,4 @@ e2e-test:
 
 .PHONY: test
 test: 
-	CONFIG_PATH=$(config_path) pytest $(ops)
+	CONFIG_PATH=$(config_path) pytest $(o)

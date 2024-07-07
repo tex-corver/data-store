@@ -1,17 +1,15 @@
 import abc
-
 import logging
 from typing import Any, Generator
 
 import utils
 
-from . import configurations, models
+from data_store import configurations, models
 
 logger = logging.getLogger(__file__)
 
 
 class ObjectStoreClient(abc.ABC):
-
     def __init__(
         self, config: dict[str, Any] | configurations.ObjectStoreConfiguration
     ) -> None:
@@ -196,8 +194,7 @@ class ObjectStoreClient(abc.ABC):
         raise NotImplementedError
 
 
-class ObjectStoreCompnentFactory(abc.ABC):
-
+class ObjectStoreComponentFactory(abc.ABC):
     def __init__(
         self, config: dict[str, Any] | configurations.ObjectStoreConfiguration
     ) -> None:
@@ -206,7 +203,6 @@ class ObjectStoreCompnentFactory(abc.ABC):
         self.config = config
 
     def create_client(self, *args, **kwargs) -> ObjectStoreClient:
-
         client = self._create_client(*args, **kwargs)
         return client
 
