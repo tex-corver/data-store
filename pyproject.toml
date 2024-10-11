@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "data-store"
+name = "tex-corver-data-store"
 version = "0.1.0"
 description = "A simple data storage library"
-authors = ["Your Name <email@gmail.com>"]
+authors = ["Long Le <hjjddbz@gmail.com>"]
 readme = "README.md"
 packages = [
-    { include = "data_store" }
+    { include = "data_store", from = "src" }
 ]
 
 [tool.poetry.dependencies]

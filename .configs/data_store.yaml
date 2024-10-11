@@ -1,8 +1,9 @@
 data_store:
   framework: minio
-  root_bucket: test
+  root_bucket: sandbox
   connection:
-    endpoint: minio:9000
-    access_key: minio
-    secret_key: minio123
+    endpoint: minio.hoaem.vn
+    access_key: admin
+    secret_key: y9wb3N0Z3
     secure: false
+
