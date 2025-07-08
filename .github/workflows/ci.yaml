@@ -20,14 +20,14 @@ jobs:
 
       - run: |
           docker build \
-            --tag tex-corver/data-store:${{ github.ref_name }}.${{ github.sha }} \
+            --tag tex-corver/data-store:test \
             --ssh default=$HOME/.ssh/id_ed25519 \
             --file Dockerfile .
 
       - name: Run tests
         run: |
           docker run \
-            tex-corver/data-store:${{ github.ref_name }}.${{ github.sha }} \
+            tex-corver/data-store:test \
             sh -c 'CONFIG_PATH=$PWD/.ci-config pytest'
 
           if [ $? -eq 0 ]; then
