@@ -127,7 +127,7 @@ class ObjectStoreClient(abc.ABC):
         self,
         data: bytes,
         key: str,
-        bucket: str = None,
+        bucket: str | None = None,
         *args,
         **kwargs,
     ):
@@ -215,7 +215,7 @@ class ObjectStoreClient(abc.ABC):
         self,
         data: bytes,
         key: str,
-        bucket: str,
+        bucket: str | None = None,
         length: int = -1,
         *args,
         **kwargs,
