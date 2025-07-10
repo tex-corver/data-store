@@ -198,6 +198,24 @@ class ObjectStore:
             **kwargs,
         )
 
+    def put_object_v2(
+        self,
+        data: bytes,
+        key: str,
+        bucket: str | None = None,
+        length: int = -1,
+        *args,
+        **kwargs,
+    ) -> dict[str, Any]:
+        return self.client.put_object_v2(
+            data=data,
+            key=key,
+            bucket=bucket,
+            length=length,
+            *args,
+            **kwargs,
+        )
+
     def copy_object(
         self,
         src_object: str,
