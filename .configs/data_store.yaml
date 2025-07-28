@@ -1,8 +1,21 @@
 data_store:
-  framework: minio
-  root_bucket: sandbox
-  connection:
-    endpoint: 192.168.0.100:9000
-    access_key: admin
-    secret_key: y9wb3N0Z3
-    secure: false
+  object_store:
+    framework: minio
+    root_bucket: sandbox
+    connection:
+      endpoint: 192.168.0.100:9000
+      access_key: admin
+      secret_key: y9wb3N0Z3
+      secure: false
+  nosql_store:
+    framework: mongodb
+    connection:
+      uri: "mongodb://simple_user:securePassword123@192.168.0.100:27017/test_simple_node?directConnection=true&authSource=test_simple_node"
+      database: test_simple_node
+      collection: products
+    query:
+      fields: [name, description, price, created_at]
+      date_field: created_at
+      start_date: "2025-01-01"
+      date_format: "%Y-%m-%d"
+      limit: 10
