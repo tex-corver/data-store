@@ -15,3 +15,12 @@ class TestNoSQLStore:
         data = store.load_data()
         assert data is not None
         assert isinstance(data, pl.DataFrame)
+
+
+class TestSQLStore:
+    def test_init(self):
+        store = data_store.SQLStore()
+        assert store.config is not None
+        data = store.load_data()
+        assert data is not None
+        assert isinstance(data, pl.DataFrame)
