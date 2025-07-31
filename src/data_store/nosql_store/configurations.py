@@ -8,34 +8,13 @@ class Framework(enum.StrEnum):
     MONGODB = "mongodb"
 
 
-class NoSQLConfiguration(pdts.BaseSettings):
-    """Configuration for NoSQL data store."""
+class NoSQLQueryConfiguration(pdt.BaseModel):
+    """Configuration for NoSQL queries."""
 
-    framework: str | None = pdt.Field(
-        default=None, description="Framework used for the NoSQL data store."
-    )
-
-    connection: "NoSQLConnectionConfiguration" = pdt.Field(
-        description="Connection configuration for the NoSQL data store.",
-    )
-    query: "NoSQLQueryConfiguration" = pdt.Field(
-        default=None,
-        description="Query configuration for the NoSQL data store.",
-    )
-
-
-class NoSQLConnectionConfiguration(pdt.BaseModel):
-    """Connection configuration for NoSQL data store."""
-
-    uri: str = pdt.Field(description="URI of the MongoDB database.")
     database: str = pdt.Field(description="Name of the MongoDB database.")
     collection: str = pdt.Field(
         description="Name of the collection to query from the database."
     )
-
-
-class NoSQLQueryConfiguration(pdt.BaseModel):
-    """Configuration for NoSQL queries."""
 
     fields: list[str] | None = pdt.Field(
         default=None,
@@ -56,4 +35,26 @@ class NoSQLQueryConfiguration(pdt.BaseModel):
     )
     limit: int | None = pdt.Field(
         default=None, description="Maximum number of documents to return."
+    )
+
+
+class NoSQLConnectionConfiguration(pdt.BaseModel):
+    """Connection configuration for NoSQL data store."""
+
+    uri: str = pdt.Field(description="URI of the MongoDB database.")
+
+
+class NoSQLConfiguration(pdts.BaseSettings):
+    """Configuration for NoSQL data store."""
+
+    framework: str | None = pdt.Field(
+        default=None, description="Framework used for the NoSQL data store."
+    )
+
+    connection: NoSQLConnectionConfiguration = pdt.Field(
+        description="Connection configuration for the NoSQL data store.",
+    )
+    query: NoSQLQueryConfiguration | None = pdt.Field(
+        default=None,
+        description="Example query configuration for the NoSQL data store.",
     )

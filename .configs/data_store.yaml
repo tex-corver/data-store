@@ -11,14 +11,6 @@ data_store:
     framework: mongodb
     connection:
       uri: "mongodb://simple_user:securePassword123@192.168.0.100:27017/test_simple_node?directConnection=true&authSource=test_simple_node"
-      database: test_simple_node
-      collection: products
-    query:
-      fields: [name, description, price, created_at]
-      date_field: created_at
-      start_date: "2025-01-01"
-      date_format: "%Y-%m-%d"
-      limit: 10
 
   sql_store:
     framework: mysql
