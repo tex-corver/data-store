@@ -6,7 +6,7 @@ import utils
 from icecream import ic
 
 __all__ = ["ObjectStore"]
-from data_store import abstract, adapters, configurations, models
+from data_store.object_store import abstract, adapters, configurations, models
 
 logger = logging.getLogger(__file__)
 
@@ -18,8 +18,8 @@ class ObjectStore:
     component_factory: abstract.ObjectStoreComponentFactory
     client: abstract.ObjectStoreClient
 
-    def __init__(self, config: dict[str, Any] = None):
-        config = config or utils.get_config().get("data_store")
+    def __init__(self, config: dict[str, Any] | None = None):
+        config = config or utils.get_config().get("data_store", {}).get("object_store")
         if config is None:
             raise ValueError("Configuration not found")
 

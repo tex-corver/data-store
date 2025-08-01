@@ -2,9 +2,7 @@ import abc
 import logging
 from typing import Any, Generator
 
-import utils
-
-from data_store import configurations, models
+from data_store.object_store import configurations, models
 
 logger = logging.getLogger(__file__)
 
