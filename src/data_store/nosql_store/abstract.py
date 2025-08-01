@@ -4,23 +4,17 @@ from typing import Any
 
 import utils
 
-from data_store import configurations, models
+from data_store.nosql_store import configurations, models
 
 logger = logging.getLogger(__file__)
 
 
-class NoSQLConfiguration:
-    """Base configuration class for NoSQL stores"""
-
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-
 class NoSQLStore(abc.ABC):
-    def __init__(self, config: dict[str, Any] | NoSQLConfiguration) -> None:
+    def __init__(
+        self, config: dict[str, Any] | configurations.NoSQLConfiguration
+    ) -> None:
         if isinstance(config, dict):
-            config = NoSQLConfiguration(**config)
+            config = configurations.NoSQLConfiguration(**config)
         self.config = config
 
     def connect(self, **config):
@@ -52,10 +46,15 @@ class NoSQLStore(abc.ABC):
             limit=limit,
         )
 
-    def update(self, collection: str, filters: dict, update_data: dict) -> int:
+    def update(
+        self, collection: str, filters: dict, update_data: dict, upsert: bool = False
+    ) -> int:
         """Update documents in a collection"""
         return self._update(
-            collection=collection, filters=filters, update_data=update_data
+            collection=collection,
+            filters=filters,
+            update_data=update_data,
+            upsert=upsert,
         )
 
     def delete(self, collection: str, filters: dict) -> int:
@@ -67,11 +66,18 @@ class NoSQLStore(abc.ABC):
         return self._bulk_insert(collection=collection, data=data)
 
     def bulk_update(
-        self, collection: str, filters: dict, update_data: list[dict]
+        self,
+        collection: str,
+        filters: dict,
+        update_data: list[dict],
+        upsert: bool = False,
     ) -> int:
         """Update multiple documents in a collection"""
         return self._bulk_update(
-            collection=collection, filters=filters, update_data=update_data
+            collection=collection,
+            filters=filters,
+            update_data=update_data,
+            upsert=upsert,
         )
 
     def bulk_delete(self, collection: str, filters: dict | list) -> int:
@@ -106,7 +112,9 @@ class NoSQLStore(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _update(self, collection: str, filters: dict, update_data: dict) -> int:
+    def _update(
+        self, collection: str, filters: dict, update_data: dict, upsert: bool = False
+    ) -> int:
         """Abstract method to update documents"""
         raise NotImplementedError
 
@@ -122,7 +130,11 @@ class NoSQLStore(abc.ABC):
 
     @abc.abstractmethod
     def _bulk_update(
-        self, collection: str, filters: dict, update_data: list[dict]
+        self,
+        collection: str,
+        filters: dict,
+        update_data: list[dict],
+        upsert: bool = False,
     ) -> int:
         """Abstract method to bulk update documents"""
         raise NotImplementedError
@@ -134,9 +146,11 @@ class NoSQLStore(abc.ABC):
 
 
 class NoSQLStoreComponentFactory(abc.ABC):
-    def __init__(self, config: dict[str, Any] | NoSQLConfiguration) -> None:
+    def __init__(
+        self, config: dict[str, Any] | configurations.NoSQLConfiguration
+    ) -> None:
         if isinstance(config, dict):
-            config = NoSQLConfiguration(**config)
+            config = configurations.NoSQLConfiguration(**config)
         self.config = config
 
     def create_client(self, *args, **kwargs) -> NoSQLStore:
