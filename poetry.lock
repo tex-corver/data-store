@@ -388,14 +388,14 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.2.1"
+version = "8.2.2"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "click-8.2.1-py3-none-any.whl", hash = "sha256:61a3265b914e850b85317d0b3109c7f8cd35a670f963866005d6ef1d5175a12b"},
-    {file = "click-8.2.1.tar.gz", hash = "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202"},
+    {file = "click-8.2.2-py3-none-any.whl", hash = "sha256:52e1e9f5d3db8c85aa76968c7c67ed41ddbacb167f43201511c8fd61eb5ba2ca"},
+    {file = "click-8.2.2.tar.gz", hash = "sha256:068616e6ef9705a07b6db727cb9c248f4eb9dae437a30239f56fa94b18b852ef"},
 ]
 
 [package.dependencies]
@@ -1484,7 +1484,7 @@ sqlalchemy = "^2.0.23"
 type = "git"
 url = "ssh://git@github.com/tex-corver/utils.git"
 reference = "HEAD"
-resolved_reference = "c183ac8b61f2722b99b819b2d9071b761b60055c"
+resolved_reference = "ec6bf653c607530bf0eb5f012dab7b68ca9e3b22"
 
 [[package]]
 name = "tomli"
