@@ -70,7 +70,7 @@ class NoSQLStore(abstract.NoSQLStore):
         database = self._get_database()
         return database[collection]
 
-    def _connect(self, **config):
+    def _connect(self):
         """Establish database connection"""
         if not self._client:
             self._client = self._init_client()

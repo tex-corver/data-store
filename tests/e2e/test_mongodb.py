@@ -31,12 +31,12 @@ def nosql_store():
     store = NoSQLStore(config=config.get("nosql_store"))
 
     # Connect to database
-    store.connect()
+    store._connect()
 
     yield store
 
     # Cleanup: Close connection after tests
-    store.close()
+    store._close()
 
 
 @pytest.fixture(autouse=True)
@@ -74,10 +74,10 @@ class TestConnection:
         # Arrange: Create a new store instance for this test
         config = utils.get_config()
         store = NoSQLStore(config.get("nosql_store"))
-        store.connect()
+        store._connect()
 
         # Act: Close the connection
-        store.close()
+        store._close()
 
         # Assert: Verify connection is closed (connection closed successfully)
         assert True  # Connection close completed successfully
@@ -100,8 +100,8 @@ class TestConnection:
             RuntimeError,
         ) as excinfo:
             store = NoSQLStore(config=config.get("nosql_store"))
-            store.connect()
-            store.close()
+            store._connect()
+            store._close()
         # Optionally check for timeout in the exception message
         assert "Timeout" in str(excinfo.value) or "timeout" in str(excinfo.value)
 
@@ -746,3 +746,194 @@ class TestNoSQLConfiguration:
             NoSQLConfiguration(
                 framework=Framework.MONGODB, connection=NoSQLConnection()
             )
+
+
+class TestNoSQLStore:
+    """Test NoSQLStore base class functionality."""
+
+    def test_connection_context_manager_basic_usage(self):
+        """Test basic context manager usage with automatic connection lifecycle."""
+        # Arrange: Create store instance
+        config = utils.get_config()
+        store = NoSQLStore(config=config.get("nosql_store"))
+
+        # Act & Assert: Use context manager
+        with store.connect() as connection:
+            # Verify connection is established
+            assert connection is not None
+            # Perform a basic operation to verify connection works
+            inserted_id = store.insert(TEST_COLLECTION, DUMMY_DOCUMENT.copy())
+            assert inserted_id is not None
+            assert isinstance(inserted_id, str)
+            assert len(inserted_id) > 0
+        # Connection is automatically closed here
+
+    def test_connection_context_manager_automatic_cleanup(self):
+        """Test that connection is automatically closed after context exit."""
+        # Arrange: Create store instance
+        config = utils.get_config()
+        store = NoSQLStore(config=config.get("nosql_store"))
+
+        # Act: Use context manager and perform operations
+        with store.connect() as connection:
+            assert connection is not None
+            # Insert test document
+            store.insert(TEST_COLLECTION, DUMMY_DOCUMENT.copy())
+            # Verify client connection exists during context
+            assert store.client._client is not None
+
+        # Assert: After context exit, connection should be closed
+        # The _client should be None after close
+        assert store.client._client is None
+
+    def test_connection_context_manager_with_exception(self):
+        """Test that connection is properly closed even when exception occurs."""
+        # Arrange: Create store instance
+        config = utils.get_config()
+        store = NoSQLStore(config=config.get("nosql_store"))
+
+        # Act & Assert: Use context manager with exception
+        with pytest.raises(ValueError):
+            with store.connect() as connection:
+                assert connection is not None
+                # Perform a valid operation first
+                store.insert(TEST_COLLECTION, DUMMY_DOCUMENT.copy())
+                # Raise an exception to test cleanup
+                raise ValueError("Test exception")
+
+        # Assert: Connection should still be closed despite exception
+        assert store.client._client is None
+
+    def test_connection_context_manager_multiple_operations(self):
+        """Test multiple operations within same connection context."""
+        # Arrange: Create store instance and test data
+        config = utils.get_config()
+        store = NoSQLStore(config=config.get("nosql_store"))
+        test_documents = [
+            {"name": "Context User 1", "type": "context_test"},
+            {"name": "Context User 2", "type": "context_test"},
+            {"name": "Context User 3", "type": "context_test"},
+        ]
+
+        # Act: Perform multiple operations in single context
+        with store.connect() as connection:
+            assert connection is not None
+
+            # Insert multiple documents
+            for doc in test_documents:
+                inserted_id = store.insert(TEST_COLLECTION, doc)
+                assert inserted_id is not None
+
+            # Query the documents
+            results = store.find(TEST_COLLECTION, {"type": "context_test"})
+            assert len(results) == 3
+
+            # Update documents
+            modified_count = store.update(
+                TEST_COLLECTION, {"type": "context_test"}, {"status": "processed"}
+            )
+            assert modified_count == 3
+
+            # Verify updates
+            updated_results = store.find(TEST_COLLECTION, {"status": "processed"})
+            assert len(updated_results) == 3
+
+        # Cleanup: Connection automatically closed
+        assert store.client._client is None
+
+    def test_connection_context_manager_with_config_parameters(self):
+        """Test context manager with custom connection configuration."""
+        # Arrange: Create store instance
+        config = utils.get_config()
+        store = NoSQLStore(config=config.get("nosql_store"))
+
+        # Act: Use context manager with custom config (empty in this case)
+        with store.connect() as connection:
+            assert connection is not None
+            # Perform operation to verify connection works
+            inserted_id = store.insert(TEST_COLLECTION, DUMMY_DOCUMENT.copy())
+            assert inserted_id is not None
+
+        # Assert: Connection properly closed
+        assert store.client._client is None
+
+    def test_connection_context_manager_nested_usage(self):
+        """Test that nested context manager usage works correctly."""
+        # Arrange: Create store instance
+        config = utils.get_config()
+        store = NoSQLStore(config=config.get("nosql_store"))
+
+        # Act: Use nested context managers (should reuse existing connection)
+        with store.connect() as connection1:
+            assert connection1 is not None
+            store.insert(TEST_COLLECTION, {"name": "Outer context", "level": 1})
+
+            with store.connect() as connection2:
+                assert connection2 is not None
+                store.insert(TEST_COLLECTION, {"name": "Inner context", "level": 2})
+
+                # Both should use same underlying connection
+                results = store.find(TEST_COLLECTION, {"level": {"$in": [1, 2]}})
+                assert len(results) == 2
+
+        # Assert: Connection properly closed after outer context
+        assert store.client._client is None
+
+    def test_connection_context_manager_bulk_operations(self):
+        """Test bulk operations within connection context manager."""
+        # Arrange: Create store instance and test data
+        config = utils.get_config()
+        store = NoSQLStore(config=config.get("nosql_store"))
+        bulk_documents = [
+            {"name": f"Bulk Context User {i}", "batch": "context_bulk"}
+            for i in range(5)
+        ]
+
+        # Act: Perform bulk operations in context
+        with store.connect() as connection:
+            assert connection is not None
+
+            # Bulk insert
+            result = store.bulk_insert(TEST_COLLECTION, bulk_documents)
+            assert result == "5"
+
+            # Bulk update
+            modified_count = store.bulk_update(
+                TEST_COLLECTION,
+                {"batch": "context_bulk"},
+                [{"status": "bulk_processed"}],
+            )
+            assert modified_count == 5
+
+            # Verify results
+            results = store.find(TEST_COLLECTION, {"batch": "context_bulk"})
+            assert len(results) == 5
+            for result in results:
+                assert result["status"] == "bulk_processed"
+
+        # Assert: Connection properly closed
+        assert store.client._client is None
+
+    def test_connection_context_manager_error_handling(self):
+        """Test error handling within connection context manager."""
+        # Arrange: Create store instance
+        config = utils.get_config()
+        store = NoSQLStore(config=config.get("nosql_store"))
+
+        # Act & Assert: Test various error scenarios
+        with store.connect() as connection:
+            assert connection is not None
+
+            # Test successful operation first
+            store.insert(TEST_COLLECTION, DUMMY_DOCUMENT.copy())
+
+            # Test operation that might cause issues (empty collection name should be handled)
+            try:
+                # This should work normally
+                results = store.find(TEST_COLLECTION, {"nonexistent_field": "value"})
+                assert isinstance(results, list)  # Should return empty list
+            except Exception as e:
+                pytest.fail(f"Unexpected exception in context manager: {e}")
+
+        # Assert: Connection properly closed even with edge cases
+        assert store.client._client is None

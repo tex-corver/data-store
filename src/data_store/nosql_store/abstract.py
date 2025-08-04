@@ -85,7 +85,7 @@ class NoSQLStore(abc.ABC):
         return self._bulk_delete(collection=collection, filters=filters)
 
     @abc.abstractmethod
-    def _connect(self, **config):
+    def _connect(self):
         """Abstract method to establish database connection"""
         raise NotImplementedError
 

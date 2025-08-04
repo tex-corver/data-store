@@ -11,6 +11,38 @@ logger = logging.getLogger(__file__)
 DEFAULT_NOSQL_FRAMEWORK = "mongodb"
 
 
+class ConnectionContext:
+    """Context manager for automatic database connection lifecycle management"""
+
+    def __init__(self, client: "NoSQLStore"):
+        """Initialize connection context
+
+        Args:
+            client: The NoSQL store client instance
+        """
+        self.client = client
+        logger.debug("ConnectionContext initialized")
+
+    def __enter__(self):
+        """Establish database connection on context entry"""
+        logger.debug("Entering connection context - establishing connection")
+        return self.client._connect()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Close database connection on context exit"""
+        logger.debug(
+            f"Exiting connection context - closing connection (exception: {exc_type})"
+        )
+        try:
+            self.client._close()
+        except Exception as close_error:
+            logger.error(f"Error closing connection: {close_error}")
+            # Don't suppress the original exception if there was one
+            if exc_type is None:
+                raise close_error
+        return False  # Don't suppress exceptions
+
+
 class NoSQLStore:
     """Main NoSQL store class providing high-level interface for NoSQL operations"""
 
@@ -32,11 +64,28 @@ class NoSQLStore:
             self._client = self.component_factory.create_client()
         return self._client
 
-    def connect(self, **config):
-        """Establish database connection"""
-        return self.client.connect(**config)
+    def connect(self):
+        """Return a context manager for automatic connection lifecycle management
 
-    def close(self):
+        Usage:
+            with store.connect() as connection:
+                # Connection is automatically established
+                store.insert("collection", data)
+                # Connection is automatically closed on exit
+
+        Args:
+            **config: Connection configuration parameters
+
+        Returns:
+            ConnectionContext: Context manager that handles connection lifecycle
+        """
+        return ConnectionContext(self)
+
+    def _connect(self):
+        """Establish database connection"""
+        return self.client.connect()
+
+    def _close(self):
         """Close database connection"""
         return self.client.close()
 
