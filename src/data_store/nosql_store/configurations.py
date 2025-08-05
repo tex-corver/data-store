@@ -1,6 +1,7 @@
 import enum
 
 import pydantic as pdt
+import pydantic_settings as pdts
 
 
 class Framework(enum.StrEnum):
@@ -91,7 +92,7 @@ class NoSQLConnection(pdt.BaseModel):
         return uri
 
 
-class NoSQLConfiguration(pdt.BaseModel):
+class NoSQLConfiguration(pdts.BaseSettings):
     framework: str | Framework = pdt.Field(
         default=Framework.MONGODB,
         description="NoSQL database framework to use (mongodb, couchdb, dynamodb).",
@@ -100,7 +101,4 @@ class NoSQLConfiguration(pdt.BaseModel):
         description="Database connection configuration settings."
     )
 
-    # class model_config:
-    #     use_enum_values = True
-
-    model_config = pdt.ConfigDict(extra="allow", use_enum_values=True)
+    model_config = pdts.SettingsConfigDict(extra="allow", use_enum_values=True)
