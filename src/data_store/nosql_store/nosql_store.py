@@ -1,3 +1,4 @@
+import contextlib
 import logging
 from typing import Any
 
@@ -9,55 +10,6 @@ from data_store.nosql_store import abstract, adapters, configurations, models
 logger = logging.getLogger(__file__)
 
 DEFAULT_NOSQL_FRAMEWORK = "mongodb"
-
-
-class ConnectionContext:
-    """Context manager for automatic database connection lifecycle management"""
-
-    def __init__(self, client: "NoSQLStore", *args, **kwargs):
-        """Initialize connection context
-
-        Args:
-            client (NoSQLStore): The NoSQL store client instance to manage connections for
-        """
-        self.client = client
-        logger.debug("ConnectionContext initialized")
-
-    def __enter__(self, *args, **kwargs) -> "abstract.NoSQLStore":
-        """Establish database connection on context entry
-
-        Returns:
-            NoSQLStore: The connected client instance
-
-        Raises:
-            RuntimeError: If connection establishment fails
-        """
-        logger.debug("Entering connection context - establishing connection")
-        self.client._connect()
-        return self.client.client
-
-    def __exit__(self, exc_type, exc_val, exc_tb, *args, **kwargs):
-        """Close database connection on context exit
-
-        Args:
-            exc_type: Exception type if exception occurred, None otherwise
-            exc_val: Exception value if exception occurred, None otherwise
-            exc_tb: Exception traceback if exception occurred, None otherwise
-
-        Returns:
-            bool: False to propagate exceptions, True to suppress them
-        """
-        logger.debug(
-            f"Exiting connection context - closing connection (exception: {exc_type})"
-        )
-        try:
-            self.client._close()
-        except Exception as close_error:
-            logger.error(f"Error closing connection: {close_error}")
-            # Don't suppress the original exception if there was one
-            if exc_type is None:
-                raise close_error
-        return False  # Don't suppress exceptions
 
 
 class NoSQLStore:
@@ -81,6 +33,7 @@ class NoSQLStore:
             self._client = self.component_factory.create_client()
         return self._client
 
+    @contextlib.contextmanager
     def connect(self, *args, **kwargs):
         """Return a context manager for automatic connection lifecycle management
 
@@ -93,15 +46,18 @@ class NoSQLStore:
         Returns:
             ConnectionContext: Context manager that handles connection lifecycle
         """
-        return ConnectionContext(self)
+        # return ConnectionContext(self)
+        self._connect(*args, **kwargs)
+        yield self
+        self._close()
 
     def _connect(self, *args, **kwargs):
         """Establish database connection"""
-        return self.client.connect()
+        return self.client.connect(*args, **kwargs)
 
     def _close(self, *args, **kwargs):
         """Close database connection"""
-        return self.client.close()
+        return self.client.close(*args, **kwargs)
 
     def insert(self, collection: str, data: dict, *args, **kwargs) -> str:
         """Insert a document into a collection
@@ -120,7 +76,7 @@ class NoSQLStore:
         Examples:
             >>> doc_id = store.insert("users", {"name": "John", "age": 30})
         """
-        return self.client.insert(collection=collection, data=data, *args, **kwargs)
+        return self.client.insert(collection, data, *args, **kwargs)
 
     def find(
         self,
@@ -153,11 +109,11 @@ class NoSQLStore:
 
         """
         return self.client.find(
-            collection=collection,
-            filters=filters,
-            projections=projections,
-            skip=skip,
-            limit=limit,
+            collection,
+            filters,
+            projections,
+            skip,
+            limit,
             *args,
             **kwargs,
         )
@@ -190,10 +146,10 @@ class NoSQLStore:
             >>> updated = store.update("users", {"name": "John"}, {"$set": {"age": 31}})
         """
         return self.client.update(
-            collection=collection,
-            filters=filters,
-            update_data=update_data,
-            upsert=upsert,
+            collection,
+            filters,
+            update_data,
+            upsert,
             *args,
             **kwargs,
         )
@@ -215,9 +171,7 @@ class NoSQLStore:
         Examples:
             >>> deleted = store.delete("users", {"name": "John"})
         """
-        return self.client.delete(
-            collection=collection, filters=filters, *args, **kwargs
-        )
+        return self.client.delete(collection, filters, *args, **kwargs)
 
     def bulk_insert(self, collection: str, data: list[dict], *args, **kwargs) -> str:
         """Insert multiple documents into a collection
@@ -236,15 +190,13 @@ class NoSQLStore:
         Examples:
             >>> result = store.bulk_insert("users", [{"name": "John"}, {"name": "Jane"}])
         """
-        return self.client.bulk_insert(
-            collection=collection, data=data, *args, **kwargs
-        )
+        return self.client.bulk_insert(collection, data, *args, **kwargs)
 
     def bulk_update(
         self,
         collection: str,
         filters: dict,
-        update_data: list[dict],
+        update_data: list[dict] | dict,
         upsert: bool = False,
         *args,
         **kwargs,
@@ -254,7 +206,7 @@ class NoSQLStore:
         Args:
             collection (str): Name of the collection to update
             filters (dict): Query filters to select documents
-            update_data (list[dict]): List of update operations or new field values
+            update_data (list[dict] | dict): List of update operations or new field values
             upsert (bool): Create document if it doesn't exist, default False
 
         Returns:
@@ -268,10 +220,10 @@ class NoSQLStore:
             >>> updated = store.bulk_update("users", {"active": True}, [{"$set": {"last_login": now}}])
         """
         return self.client.bulk_update(
-            collection=collection,
-            filters=filters,
-            update_data=update_data,
-            upsert=upsert,
+            collection,
+            filters,
+            update_data,
+            upsert,
             *args,
             **kwargs,
         )
@@ -296,9 +248,7 @@ class NoSQLStore:
             >>> deleted = store.bulk_delete("users", {"status": "inactive"})
             >>> deleted = store.bulk_delete("users", [{"status": "inactive"}, {"age": {"$lt": 18}}])
         """
-        return self.client.bulk_delete(
-            collection=collection, filters=filters, *args, **kwargs
-        )
+        return self.client.bulk_delete(collection, filters, *args, **kwargs)
 
     def _init_component_factory(
         self, *args, **kwargs
@@ -316,4 +266,4 @@ class NoSQLStore:
         if framework_str not in adapters.adapter_router:
             raise ValueError(f"Doesn't support framework: {framework_str}")
 
-        return adapters.adapter_router[framework_str](self.config)
+        return adapters.adapter_router[framework_str](self.config, *args, **kwargs)
