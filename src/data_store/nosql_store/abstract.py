@@ -17,7 +17,7 @@ class NoSQLStore(abc.ABC):
             config = configurations.NoSQLConfiguration(**config)
         self.config = config
 
-    def connect(self, **config):
+    def connect(self, *args, **config):
         """Establish database connection
 
         Args:
@@ -29,17 +29,17 @@ class NoSQLStore(abc.ABC):
         Raises:
             RuntimeError: If connection establishment fails
         """
-        return self._connect(**config)
+        return self._connect(*args, **config)
 
-    def close(self):
+    def close(self, *args, **kwargs):
         """Close connection
 
         Raises:
             RuntimeError: If connection closure fails
         """
-        return self._close()
+        return self._close(*args, **kwargs)
 
-    def insert(self, collection: str, data: dict) -> str:
+    def insert(self, collection: str, data: dict, *args, **kwargs) -> str:
         """Insert a document into a collection
 
         Args:
@@ -53,7 +53,7 @@ class NoSQLStore(abc.ABC):
             ValueError: If collection name is empty or data is None
             RuntimeError: If database operation fails
         """
-        return self._insert(collection=collection, data=data)
+        return self._insert(collection=collection, data=data, *args, **kwargs)
 
     def find(
         self,
@@ -62,6 +62,8 @@ class NoSQLStore(abc.ABC):
         projections: list[str] | None = None,
         skip: int = 0,
         limit: int = 0,
+        *args,
+        **kwargs,
     ) -> list:
         """Find documents in a collection
 
@@ -89,10 +91,18 @@ class NoSQLStore(abc.ABC):
             projections=projections,
             skip=skip,
             limit=limit,
+            *args,
+            **kwargs,
         )
 
     def update(
-        self, collection: str, filters: dict, update_data: dict, upsert: bool = False
+        self,
+        collection: str,
+        filters: dict,
+        update_data: dict,
+        upsert: bool = False,
+        *args,
+        **kwargs,
     ) -> int:
         """Update documents in a collection
 
@@ -114,9 +124,11 @@ class NoSQLStore(abc.ABC):
             filters=filters,
             update_data=update_data,
             upsert=upsert,
+            *args,
+            **kwargs,
         )
 
-    def delete(self, collection: str, filters: dict) -> int:
+    def delete(self, collection: str, filters: dict, *args, **kwargs) -> int:
         """Delete documents from a collection
 
         Args:
@@ -130,9 +142,9 @@ class NoSQLStore(abc.ABC):
             ValueError: If collection name is empty or filters are None
             RuntimeError: If database operation fails
         """
-        return self._delete(collection=collection, filters=filters)
+        return self._delete(collection=collection, filters=filters, *args, **kwargs)
 
-    def bulk_insert(self, collection: str, data: list[dict]) -> str:
+    def bulk_insert(self, collection: str, data: list[dict], *args, **kwargs) -> str:
         """Insert multiple documents into a collection
 
         Args:
@@ -146,7 +158,7 @@ class NoSQLStore(abc.ABC):
             ValueError: If collection name is empty or data is None
             RuntimeError: If database operation fails
         """
-        return self._bulk_insert(collection=collection, data=data)
+        return self._bulk_insert(collection=collection, data=data, *args, **kwargs)
 
     def bulk_update(
         self,
@@ -154,6 +166,8 @@ class NoSQLStore(abc.ABC):
         filters: dict,
         update_data: list[dict],
         upsert: bool = False,
+        *args,
+        **kwargs,
     ) -> int:
         """Update multiple documents in a collection
 
@@ -175,9 +189,13 @@ class NoSQLStore(abc.ABC):
             filters=filters,
             update_data=update_data,
             upsert=upsert,
+            *args,
+            **kwargs,
         )
 
-    def bulk_delete(self, collection: str, filters: dict | list) -> int:
+    def bulk_delete(
+        self, collection: str, filters: dict | list, *args, **kwargs
+    ) -> int:
         """Delete multiple documents from a collection
 
         Args:
@@ -191,10 +209,12 @@ class NoSQLStore(abc.ABC):
             ValueError: If collection name is empty or filters are None
             RuntimeError: If database operation fails
         """
-        return self._bulk_delete(collection=collection, filters=filters)
+        return self._bulk_delete(
+            collection=collection, filters=filters, *args, **kwargs
+        )
 
     @abc.abstractmethod
-    def _connect(self):
+    def _connect(self, *args, **kwargs):
         """Abstract method to establish database connection
 
         Returns:
@@ -206,7 +226,7 @@ class NoSQLStore(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _close(self):
+    def _close(self, *args, **kwargs):
         """Abstract method to close connection
 
         Raises:
@@ -215,7 +235,7 @@ class NoSQLStore(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _insert(self, collection: str, data: dict) -> str:
+    def _insert(self, collection: str, data: dict, *args, **kwargs) -> str:
         """Abstract method to insert a document
 
         Args:
@@ -239,6 +259,8 @@ class NoSQLStore(abc.ABC):
         projections: list[str] | None = None,
         skip: int = 0,
         limit: int = 0,
+        *args,
+        **kwargs,
     ) -> list:
         """Abstract method to find documents
 
@@ -259,7 +281,13 @@ class NoSQLStore(abc.ABC):
 
     @abc.abstractmethod
     def _update(
-        self, collection: str, filters: dict, update_data: dict, upsert: bool = False
+        self,
+        collection: str,
+        filters: dict,
+        update_data: dict,
+        upsert: bool = False,
+        *args,
+        **kwargs,
     ) -> int:
         """Abstract method to update documents
 
@@ -279,7 +307,7 @@ class NoSQLStore(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _delete(self, collection: str, filters: dict) -> int:
+    def _delete(self, collection: str, filters: dict, *args, **kwargs) -> int:
         """Abstract method to delete documents
 
         Args:
@@ -296,7 +324,7 @@ class NoSQLStore(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _bulk_insert(self, collection: str, data: list[dict]) -> str:
+    def _bulk_insert(self, collection: str, data: list[dict], *args, **kwargs) -> str:
         """Abstract method to bulk insert documents
 
         Args:
@@ -319,6 +347,8 @@ class NoSQLStore(abc.ABC):
         filters: dict,
         update_data: list[dict],
         upsert: bool = False,
+        *args,
+        **kwargs,
     ) -> int:
         """Abstract method to bulk update documents
 
@@ -338,7 +368,9 @@ class NoSQLStore(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _bulk_delete(self, collection: str, filters: dict | list) -> int:
+    def _bulk_delete(
+        self, collection: str, filters: dict | list, *args, **kwargs
+    ) -> int:
         """Abstract method to bulk delete documents
 
         Args:
@@ -357,7 +389,10 @@ class NoSQLStore(abc.ABC):
 
 class NoSQLStoreComponentFactory(abc.ABC):
     def __init__(
-        self, config: dict[str, Any] | configurations.NoSQLConfiguration
+        self,
+        config: dict[str, Any] | configurations.NoSQLConfiguration,
+        *args,
+        **kwargs,
     ) -> None:
         if isinstance(config, dict):
             config = configurations.NoSQLConfiguration(**config)

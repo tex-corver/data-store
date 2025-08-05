@@ -14,7 +14,7 @@ DEFAULT_NOSQL_FRAMEWORK = "mongodb"
 class ConnectionContext:
     """Context manager for automatic database connection lifecycle management"""
 
-    def __init__(self, client: "NoSQLStore"):
+    def __init__(self, client: "NoSQLStore", *args, **kwargs):
         """Initialize connection context
 
         Args:
@@ -23,7 +23,7 @@ class ConnectionContext:
         self.client = client
         logger.debug("ConnectionContext initialized")
 
-    def __enter__(self):
+    def __enter__(self, *args, **kwargs) -> "abstract.NoSQLStore":
         """Establish database connection on context entry
 
         Returns:
@@ -33,9 +33,10 @@ class ConnectionContext:
             RuntimeError: If connection establishment fails
         """
         logger.debug("Entering connection context - establishing connection")
-        return self.client._connect()
+        self.client._connect()
+        return self.client.client
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb, *args, **kwargs):
         """Close database connection on context exit
 
         Args:
@@ -65,7 +66,7 @@ class NoSQLStore:
     config: configurations.NoSQLConfiguration
     component_factory: abstract.NoSQLStoreComponentFactory
 
-    def __init__(self, config: dict[str, Any] | None = None):
+    def __init__(self, config: dict[str, Any] | None = None, *args, **kwargs):
         config = config or utils.get_config().get("nosql_store")
         if config is None:
             raise ValueError("Configuration not found")
@@ -80,7 +81,7 @@ class NoSQLStore:
             self._client = self.component_factory.create_client()
         return self._client
 
-    def connect(self):
+    def connect(self, *args, **kwargs):
         """Return a context manager for automatic connection lifecycle management
 
         Usage:
@@ -94,15 +95,15 @@ class NoSQLStore:
         """
         return ConnectionContext(self)
 
-    def _connect(self):
+    def _connect(self, *args, **kwargs):
         """Establish database connection"""
         return self.client.connect()
 
-    def _close(self):
+    def _close(self, *args, **kwargs):
         """Close database connection"""
         return self.client.close()
 
-    def insert(self, collection: str, data: dict) -> str:
+    def insert(self, collection: str, data: dict, *args, **kwargs) -> str:
         """Insert a document into a collection
 
         Args:
@@ -119,7 +120,7 @@ class NoSQLStore:
         Examples:
             >>> doc_id = store.insert("users", {"name": "John", "age": 30})
         """
-        return self.client.insert(collection=collection, data=data)
+        return self.client.insert(collection=collection, data=data, *args, **kwargs)
 
     def find(
         self,
@@ -128,6 +129,8 @@ class NoSQLStore:
         projections: list[str] | None = None,
         skip: int = 0,
         limit: int = 0,
+        *args,
+        **kwargs,
     ) -> list:
         """Find documents in a collection
 
@@ -155,6 +158,8 @@ class NoSQLStore:
             projections=projections,
             skip=skip,
             limit=limit,
+            *args,
+            **kwargs,
         )
 
     def update(
@@ -163,6 +168,8 @@ class NoSQLStore:
         filters: dict,
         update_data: dict,
         upsert: bool = False,
+        *args,
+        **kwargs,
     ) -> int:
         """Update documents in a collection
 
@@ -187,9 +194,11 @@ class NoSQLStore:
             filters=filters,
             update_data=update_data,
             upsert=upsert,
+            *args,
+            **kwargs,
         )
 
-    def delete(self, collection: str, filters: dict) -> int:
+    def delete(self, collection: str, filters: dict, *args, **kwargs) -> int:
         """Delete documents from a collection
 
         Args:
@@ -206,9 +215,11 @@ class NoSQLStore:
         Examples:
             >>> deleted = store.delete("users", {"name": "John"})
         """
-        return self.client.delete(collection=collection, filters=filters)
+        return self.client.delete(
+            collection=collection, filters=filters, *args, **kwargs
+        )
 
-    def bulk_insert(self, collection: str, data: list[dict]) -> str:
+    def bulk_insert(self, collection: str, data: list[dict], *args, **kwargs) -> str:
         """Insert multiple documents into a collection
 
         Args:
@@ -225,7 +236,9 @@ class NoSQLStore:
         Examples:
             >>> result = store.bulk_insert("users", [{"name": "John"}, {"name": "Jane"}])
         """
-        return self.client.bulk_insert(collection=collection, data=data)
+        return self.client.bulk_insert(
+            collection=collection, data=data, *args, **kwargs
+        )
 
     def bulk_update(
         self,
@@ -233,6 +246,8 @@ class NoSQLStore:
         filters: dict,
         update_data: list[dict],
         upsert: bool = False,
+        *args,
+        **kwargs,
     ) -> int:
         """Update multiple documents in a collection
 
@@ -257,9 +272,13 @@ class NoSQLStore:
             filters=filters,
             update_data=update_data,
             upsert=upsert,
+            *args,
+            **kwargs,
         )
 
-    def bulk_delete(self, collection: str, filters: dict | list) -> int:
+    def bulk_delete(
+        self, collection: str, filters: dict | list, *args, **kwargs
+    ) -> int:
         """Delete multiple documents from a collection
 
         Args:
@@ -277,9 +296,13 @@ class NoSQLStore:
             >>> deleted = store.bulk_delete("users", {"status": "inactive"})
             >>> deleted = store.bulk_delete("users", [{"status": "inactive"}, {"age": {"$lt": 18}}])
         """
-        return self.client.bulk_delete(collection=collection, filters=filters)
+        return self.client.bulk_delete(
+            collection=collection, filters=filters, *args, **kwargs
+        )
 
-    def _init_component_factory(self) -> abstract.NoSQLStoreComponentFactory:
+    def _init_component_factory(
+        self, *args, **kwargs
+    ) -> abstract.NoSQLStoreComponentFactory:
         """Initialize the component factory based on configured framework"""
         framework = self.config.framework or DEFAULT_NOSQL_FRAMEWORK
 

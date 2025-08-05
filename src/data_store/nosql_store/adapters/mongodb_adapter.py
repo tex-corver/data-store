@@ -17,33 +17,34 @@ T = TypeVar("T")
 
 
 def validate_not_none(
-    param_name: str,
+    *param_names: str,
 ) -> Callable[[Callable[..., T]], Callable[..., T]]:
-    """Decorator to validate that a parameter is not None
+    """Decorator to validate that specified parameters are not None
 
     Args:
-        param_name (str): Name of the parameter to validate
+        *param_names (str): Names of the parameters to validate
 
     Returns:
-        Callable: Decorated function that validates the parameter
+        Callable: Decorated function that validates the parameters
 
     Raises:
-        ValueError: If the specified parameter is None
+        ValueError: If any of the specified parameters is None
     """
 
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> T:
-            # Get parameter value from args or kwargs
-            param_value = kwargs.get(param_name)
-            if not param_value:
-                # Try to get from args if not in kwargs
-                try:
-                    param_index = func.__code__.co_varnames.index(param_name)
-                    if param_index < len(args):
-                        param_value = args[param_index]
-                except (ValueError, IndexError):
-                    pass
+            for param_name in param_names:
+                # Get parameter value from args or kwargs
+                param_value = kwargs.get(param_name)
+                if not param_value:
+                    # Try to get from args if not in kwargs
+                    try:
+                        param_index = func.__code__.co_varnames.index(param_name)
+                        if param_index < len(args):
+                            param_value = args[param_index]
+                    except (ValueError, IndexError):
+                        pass
 
                 if not param_value:
                     raise ValueError(
@@ -64,14 +65,17 @@ class NoSQLStore(abstract.NoSQLStore):
     def __init__(
         self,
         config: dict[str, Any] | configurations.NoSQLConfiguration,
+        *args,
+        **kwargs,
     ) -> None:
         super().__init__(config)
         self._client: pymongo.MongoClient | None = None
         self._database: pymongo.database.Database | None = None
 
-    def _init_client(self) -> pymongo.MongoClient:
+    def _init_client(self, *args, **kwargs) -> pymongo.MongoClient:
         """Initialize MongoDB client using connection configuration
-
+        Attributes:
+            kwargs(dict): Additional keyword arguments for pymongo.MongoClient
         Returns:
             pymongo.MongoClient: Configured MongoDB client instance
 
@@ -84,7 +88,9 @@ class NoSQLStore(abstract.NoSQLStore):
         connection_timeout = connection_config.connection_timeout
 
         client = pymongo.MongoClient(
-            connection_uri, serverSelectionTimeoutMS=connection_timeout * 1000
+            connection_uri,
+            serverSelectionTimeoutMS=connection_timeout * 1000,
+            **kwargs,
         )
 
         # Test the connection
@@ -103,7 +109,7 @@ class NoSQLStore(abstract.NoSQLStore):
 
         return client
 
-    def _get_database(self) -> pymongo.database.Database:
+    def _get_database(self, *args, **kwargs) -> pymongo.database.Database:
         """Get database instance
 
         Returns:
@@ -124,7 +130,10 @@ class NoSQLStore(abstract.NoSQLStore):
 
         return self._database
 
-    def _get_collection(self, collection: str) -> pymongo.collection.Collection:
+    @validate_not_none("collection")
+    def _get_collection(
+        self, collection: str, *args, **kwargs
+    ) -> pymongo.collection.Collection:
         """Get collection instance
 
         Args:
@@ -139,8 +148,11 @@ class NoSQLStore(abstract.NoSQLStore):
         database = self._get_database()
         return database[collection]
 
-    def _connect(self):
+    def _connect(self, *args, **kwargs):
         """Establish database connection
+
+        Attributes:
+            **kwargs (dict): Additional keyword arguments for pymongo.MongoClient
 
         Returns:
             pymongo.MongoClient: Connected MongoDB client instance
@@ -149,7 +161,7 @@ class NoSQLStore(abstract.NoSQLStore):
             RuntimeError: If connection establishment fails
         """
         if not self._client:
-            self._client = self._init_client()
+            self._client = self._init_client(*args, **kwargs)
         return self._client
 
     def _close(self):
@@ -164,13 +176,15 @@ class NoSQLStore(abstract.NoSQLStore):
             self._database = None
             logger.info("MongoDB connection closed")
 
-    @validate_not_none("data")
-    def _insert(self, collection: str, data: dict) -> str:
+    @validate_not_none("collection", "data")
+    def _insert(self, collection: str, data: dict, *args, **kwargs) -> str:
         """Insert a document into a collection
 
         Args:
             collection (str): Name of the collection to insert into
             data (dict): Document data to insert
+            *args: Additional positional arguments for pymongo insert_one
+            **kwargs: Additional keyword arguments for pymongo insert_one
 
         Returns:
             str: ID of the inserted document
@@ -180,9 +194,10 @@ class NoSQLStore(abstract.NoSQLStore):
             RuntimeError: If database operation fails
         """
         _collection = self._get_collection(collection)
-        result = _collection.insert_one(data)
+        result = _collection.insert_one(data, *args, **kwargs)
         return str(result.inserted_id)
 
+    @validate_not_none("collection")
     def _find(
         self,
         collection: str,
@@ -190,6 +205,8 @@ class NoSQLStore(abstract.NoSQLStore):
         projections: list[str] | None = None,
         skip: int = 0,
         limit: int = 0,
+        *args,
+        **kwargs,
     ) -> list:
         """Find documents in a collection
 
@@ -199,6 +216,8 @@ class NoSQLStore(abstract.NoSQLStore):
             projections (list[str] | None): Fields to include in results, default is None
             skip (int): Number of documents to skip, default is 0
             limit (int): Maximum number of documents to return, default is 0 (no limit)
+            *args: Additional positional arguments for pymongo find
+            **kwargs: Additional keyword arguments for pymongo find
 
         Returns:
             list: List of documents matching the query
@@ -219,10 +238,12 @@ class NoSQLStore(abstract.NoSQLStore):
             projection_dict = {field: 1 for field in projections}
 
         cursor = _collection.find(
-            filter=filters or {},
-            projection=projection_dict,
-            skip=skip,
-            limit=limit if limit > 0 else 0,
+            filters or {},
+            projection_dict,
+            skip,
+            limit if limit > 0 else 0,
+            *args,
+            **kwargs,
         )
 
         # Convert ObjectId to string for JSON serialization
@@ -234,9 +255,15 @@ class NoSQLStore(abstract.NoSQLStore):
 
         return documents
 
-    @validate_not_none("update_data")
+    @validate_not_none("collection", "filters", "update_data")
     def _update(
-        self, collection: str, filters: dict, update_data: dict, upsert: bool = False
+        self,
+        collection: str,
+        filters: dict,
+        update_data: dict,
+        upsert: bool = False,
+        *args,
+        **kwargs,
     ) -> int:
         """Update documents in a collection
 
@@ -259,10 +286,13 @@ class NoSQLStore(abstract.NoSQLStore):
         if not any(key.startswith("$") for key in update_data.keys()):
             update_data = {"$set": update_data}
 
-        result = _collection.update_many(filters, update_data, upsert=upsert)
+        result = _collection.update_one(filters, update_data, upsert, *args, **kwargs)
         return result.modified_count
 
-    def _delete(self, collection: str, filters: dict) -> int:
+    @validate_not_none(
+        "collection",
+    )
+    def _delete(self, collection: str, filters: dict, *args, **kwargs) -> int:
         """Delete documents from a collection
 
         Args:
@@ -277,11 +307,11 @@ class NoSQLStore(abstract.NoSQLStore):
             RuntimeError: If database operation fails
         """
         _collection = self._get_collection(collection)
-        result = _collection.delete_many(filters)
+        result = _collection.delete_one(filters, *args, **kwargs)
         return result.deleted_count
 
-    @validate_not_none("data")
-    def _bulk_insert(self, collection: str, data: list[dict]) -> str:
+    @validate_not_none("collection", "data")
+    def _bulk_insert(self, collection: str, data: list[dict], *args, **kwargs) -> str:
         """Insert multiple documents into a collection
 
         Args:
@@ -297,16 +327,18 @@ class NoSQLStore(abstract.NoSQLStore):
         """
 
         _collection = self._get_collection(collection)
-        result = _collection.insert_many(data)
+        result = _collection.insert_many(data, *args, **kwargs)
         return f"{len(result.inserted_ids)}"
 
-    @validate_not_none("update_data")
+    @validate_not_none("collection", "filters", "update_data")
     def _bulk_update(
         self,
         collection: str,
         filters: dict,
         update_data: list[dict],
         upsert: bool = False,
+        *args,
+        **kwargs,
     ) -> int:
         """Update multiple documents in a collection
 
@@ -333,12 +365,17 @@ class NoSQLStore(abstract.NoSQLStore):
             if not any(key.startswith("$") for key in update_doc.keys()):
                 update_doc = {"$set": update_doc}
 
-            result = _collection.update_many(filters, update_doc, upsert=upsert)
+            result = _collection.update_many(
+                filters, update_doc, upsert, *args, **kwargs
+            )
             total_modified += result.modified_count
 
         return total_modified
 
-    def _bulk_delete(self, collection: str, filters: dict | list) -> int:
+    @validate_not_none("collection")
+    def _bulk_delete(
+        self, collection: str, filters: dict | list, *args, **kwargs
+    ) -> int:
         """Delete multiple documents from a collection
 
         Args:
@@ -357,12 +394,12 @@ class NoSQLStore(abstract.NoSQLStore):
 
         if isinstance(filters, dict):
             # Single filter for all documents
-            result = _collection.delete_many(filters)
+            result = _collection.delete_many(filters, *args, **kwargs)
             total_deleted = result.deleted_count
         elif isinstance(filters, list):
             # Multiple filters
             for filter_doc in filters:
-                result = _collection.delete_many(filter_doc)
+                result = _collection.delete_many(filter_doc, *args, **kwargs)
                 total_deleted += result.deleted_count
         else:
             raise ValueError("Filters must be dict or list of dicts")
@@ -373,7 +410,12 @@ class NoSQLStore(abstract.NoSQLStore):
 class NoSQLStoreComponentFactory(abstract.NoSQLStoreComponentFactory):
     """Factory for creating MongoDB NoSQL store clients"""
 
-    def __init__(self, config: dict[str, Any] | configurations.NoSQLConfiguration):
+    def __init__(
+        self,
+        config: dict[str, Any] | configurations.NoSQLConfiguration,
+        *args,
+        **kwargs,
+    ):
         """Initialize MongoDB component factory
 
         Args:
