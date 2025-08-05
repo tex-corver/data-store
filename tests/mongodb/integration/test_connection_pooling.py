@@ -27,10 +27,10 @@ def cleanup_pooling_collection(mongodb_store):
         pass
 
 
+@pytest.mark.skip("Connection pooling is not supported yet")
 class TestConnectionPooling:
     """Test MongoDB connection pooling functionality."""
 
-    @pytest.mark.skip
     def test_connection_pooling_basic(self):
         """Test basic connection pooling behavior.
 
@@ -78,7 +78,6 @@ class TestConnectionPooling:
             results = store.find(TEST_COLLECTION, {"type": "context_pooling_test"})
             assert len(results) == 3
 
-    @pytest.mark.skip
     def test_multiple_store_instances_connection_pooling(self):
         """Test connection pooling with multiple store instances.
 

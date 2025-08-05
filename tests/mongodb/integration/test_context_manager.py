@@ -13,6 +13,15 @@ DUMMY_DOCUMENT = {"name": "Test User", "age": 30, "email": "test@example.com"}
 TEST_COLLECTION = "test_collection_e2e"
 
 
+def cleanup_context_collection(mongodb_store):
+    """Clean up the test collection used in context manager tests."""
+    with mongodb_store.connect() as conn:
+        try:
+            mongodb_store.bulk_delete(TEST_COLLECTION, {})
+        except Exception:
+            pass
+
+
 class TestContextManager:
     """Test NoSQLStore context manager functionality."""
 
@@ -65,6 +74,7 @@ class TestContextManager:
             {"name": "Context User 2", "type": "context_test"},
             {"name": "Context User 3", "type": "context_test"},
         ]
+        cleanup_context_collection(store)
         with store.connect() as connection:
             assert connection is not None
             # Insert multiple documents
@@ -75,7 +85,7 @@ class TestContextManager:
             results = store.find(TEST_COLLECTION, {"type": "context_test"})
             assert len(results) == 3
             # Update documents
-            modified_count = store.update(
+            modified_count = store.bulk_update(
                 TEST_COLLECTION, {"type": "context_test"}, {"status": "processed"}
             )
             assert modified_count == 3
@@ -83,6 +93,7 @@ class TestContextManager:
             updated_results = store.find(TEST_COLLECTION, {"status": "processed"})
             assert len(updated_results) == 3
         # Connection automatically closed
+        cleanup_context_collection(store)
 
     def test_context_manager_with_config_parameters(self):
         """Test context manager with custom connection configuration."""

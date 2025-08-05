@@ -32,14 +32,8 @@ class TestDataEdgeCases:
     def test_empty_document_insert(self, mongodb_store):
         """Test inserting an empty document."""
         # Insert an empty document
-        inserted_id = mongodb_store.insert(TEST_COLLECTION, {})
-        assert inserted_id is not None
-        assert isinstance(inserted_id, str)
-        assert len(inserted_id) > 0
-
-        # Verify the document exists (it will have an _id field)
-        results = mongodb_store.find(TEST_COLLECTION, {})
-        assert len(results) == 1
+        with pytest.raises(ValueError, match="data cannot be None"):
+            inserted_id = mongodb_store.insert(TEST_COLLECTION, {})
 
     def test_large_document_insert(self, mongodb_store):
         """Test inserting a large document.
@@ -116,17 +110,13 @@ class TestDataEdgeCases:
         mongodb_store.insert(TEST_COLLECTION, original_doc)
 
         # Update with an empty document (should not change anything)
-        modified_count = mongodb_store.update(
-            TEST_COLLECTION,
-            filters={"name": "Update Test"},
-            update_data={},
-            upsert=False,
-        )
-
-        # Verify the document still exists with original data
-        results = mongodb_store.find(TEST_COLLECTION, {"name": "Update Test"})
-        assert len(results) == 1
-        assert results[0]["value"] == "original"
+        with pytest.raises(ValueError, match="update_data cannot be None"):
+            modified_count = mongodb_store.update(
+                TEST_COLLECTION,
+                filters={"name": "Update Test"},
+                update_data={},
+                upsert=False,
+            )
 
     def test_find_with_none_filter(self, mongodb_store):
         """Test finding documents with None filter."""

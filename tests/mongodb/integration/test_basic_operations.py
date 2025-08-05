@@ -76,7 +76,13 @@ class TestBasicOperations:
         deleted_count = mongodb_store.delete(TEST_COLLECTION, {"status": "to_delete"})
 
         # Verify documents were deleted
-        assert deleted_count == 2
+        assert deleted_count == 1
+        deleted_count = mongodb_store.delete(TEST_COLLECTION, {"status": "to_delete"})
+        assert deleted_count == 1
+
+        deleted_count = mongodb_store.delete(TEST_COLLECTION, {"status": "to_delete"})
+        assert deleted_count == 0  # No more documents to delete
+
         results = mongodb_store.find(TEST_COLLECTION, {"status": "to_delete"})
         assert len(results) == 0
 

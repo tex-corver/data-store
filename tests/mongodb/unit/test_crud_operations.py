@@ -113,6 +113,6 @@ class TestDeletionOperations:
         mongodb_store.insert(TEST_COLLECTION, doc1)
         mongodb_store.insert(TEST_COLLECTION, doc2)
         deleted_count = mongodb_store.delete(TEST_COLLECTION, {"status": "to_delete"})
-        assert deleted_count == 2
+        assert deleted_count == 1
         results = mongodb_store.find(TEST_COLLECTION, {"status": "to_delete"})
-        assert len(results) == 0
+        assert len(results) == 1
