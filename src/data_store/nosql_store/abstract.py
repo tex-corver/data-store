@@ -164,7 +164,7 @@ class NoSQLStore(abc.ABC):
         self,
         collection: str,
         filters: dict,
-        update_data: list[dict],
+        update_data: list[dict] | dict,
         upsert: bool = False,
         *args,
         **kwargs,

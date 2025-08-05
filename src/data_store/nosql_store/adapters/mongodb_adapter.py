@@ -2,12 +2,12 @@ import functools
 import logging
 from typing import Any, Callable, TypeVar
 
+import bson
 import pymongo
 import pymongo.collection
 import pymongo.database
 import pymongo.errors
 import utils
-from bson import ObjectId
 
 from data_store.nosql_store import abstract, configurations, models
 
@@ -249,7 +249,7 @@ class NoSQLStore(abstract.NoSQLStore):
         # Convert ObjectId to string for JSON serialization
         documents = []
         for doc in cursor:
-            if "_id" in doc and isinstance(doc["_id"], ObjectId):
+            if "_id" in doc and isinstance(doc["_id"], bson.ObjectId):
                 doc["_id"] = str(doc["_id"])
             documents.append(doc)
 
@@ -335,7 +335,7 @@ class NoSQLStore(abstract.NoSQLStore):
         self,
         collection: str,
         filters: dict,
-        update_data: list[dict],
+        update_data: list[dict] | dict,
         upsert: bool = False,
         *args,
         **kwargs,
@@ -358,6 +358,8 @@ class NoSQLStore(abstract.NoSQLStore):
 
         _collection = self._get_collection(collection)
         total_modified = 0
+        if not isinstance(update_data, list):
+            update_data = [update_data]
 
         # Process each update operation
         for update_doc in update_data:
