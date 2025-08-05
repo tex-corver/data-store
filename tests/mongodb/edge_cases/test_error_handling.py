@@ -12,45 +12,69 @@ from data_store.nosql_store.nosql_store import NoSQLStore
 TEST_COLLECTION = "test_collection_error_handling"
 
 
+@pytest.fixture(autouse=True)
+def cleanup_error_collection(mongodb_store):
+    """Clean up error handling test collection before and after each test."""
+    try:
+        mongodb_store.delete(TEST_COLLECTION, {})
+    except Exception:
+        pass
+    yield
+    try:
+        mongodb_store.delete(TEST_COLLECTION, {})
+    except Exception:
+        pass
+
+
 class TestErrorHandling:
     """Test MongoDB error handling scenarios."""
 
-    def test_invalid_collection_name(self, mongodb_store):
+    @pytest.mark.parametrize(
+        "collection_name,description", [("", "empty string"), (None, "None value")]
+    )
+    def test_invalid_collection_name(self, mongodb_store, collection_name, description):
         """Test behavior with invalid collection names."""
-        # Test with empty collection name
+        # Test with invalid collection name
         with pytest.raises(Exception):  # Expect some kind of error
-            mongodb_store.insert("", {"test": "data"})
+            mongodb_store.insert(collection_name, {"test": "data"})
 
-        # Test with None collection name
-        with pytest.raises(Exception):  # Expect some kind of error
-            mongodb_store.insert(None, {"test": "data"})
-
-    def test_invalid_document_structure(self, mongodb_store):
+    @pytest.mark.parametrize(
+        "document,operation,description",
+        [
+            (None, "insert", "None document"),
+            ("not a dict", "insert", "non-dict document"),
+        ],
+    )
+    def test_invalid_insert_document_structure(
+        self, mongodb_store, document, operation, description
+    ):
         """Test behavior with invalid document structures."""
-        # Test with None document
         with pytest.raises(Exception):  # Expect some kind of error
-            mongodb_store.insert(TEST_COLLECTION, None)
+            mongodb_store.insert(TEST_COLLECTION, document)
 
-        # Test with non-dict document
-        with pytest.raises(Exception):  # Expect some kind of error
-            mongodb_store.insert(TEST_COLLECTION, "not a dict")
-
-        # Test with non-dict filters
+    def test_invalid_find_operations(self, mongodb_store):
+        """Test behavior with invalid find operations."""
+        # Test find with None filters
         with pytest.raises(Exception):  # Expect some kind of error
             mongodb_store.find(TEST_COLLECTION, "not a dict")
 
-    def test_invalid_update_operations(self, mongodb_store):
+    @pytest.mark.parametrize(
+        "filters,update_data,description",
+        [
+            (None, {"value": "updated"}, "None filters"),
+            ({"name": "test"}, None, "None update_data"),
+        ],
+    )
+    def test_invalid_update_operations(
+        self, mongodb_store, filters, update_data, description
+    ):
         """Test behavior with invalid update operations."""
         # Insert a document first
         mongodb_store.insert(TEST_COLLECTION, {"name": "test", "value": "original"})
 
-        # Test update with None filters
+        # Test update with invalid parameters
         with pytest.raises(Exception):  # Expect some kind of error
-            mongodb_store.update(TEST_COLLECTION, None, {"value": "updated"})
-
-        # Test update with None update_data
-        with pytest.raises(Exception):  # Expect some kind of error
-            mongodb_store.update(TEST_COLLECTION, {"name": "test"}, None)
+            mongodb_store.update(TEST_COLLECTION, filters, update_data)
 
     def test_invalid_delete_operations(self, mongodb_store):
         """Test behavior with invalid delete operations."""
@@ -61,27 +85,42 @@ class TestErrorHandling:
         with pytest.raises(Exception):  # Expect some kind of error
             mongodb_store.delete(TEST_COLLECTION, None)
 
-    def test_invalid_bulk_operations(self, mongodb_store):
-        """Test behavior with invalid bulk operations."""
-        # Test bulk_insert with None data
-        with pytest.raises(Exception):  # Expect some kind of error
-            mongodb_store.bulk_insert(TEST_COLLECTION, None)
+    @pytest.mark.parametrize(
+        "data,description",
+        [
+            (None, "None data"),
+            ("not a list", "non-list data"),
+        ],
+    )
+    def test_invalid_bulk_insert(self, mongodb_store, data, description):
+        """Test bulk_insert with invalid data."""
+        with pytest.raises(Exception):
+            mongodb_store.bulk_insert(TEST_COLLECTION, data)
 
-        # Test bulk_insert with non-list data
-        with pytest.raises(Exception):  # Expect some kind of error
-            mongodb_store.bulk_insert(TEST_COLLECTION, "not a list")
+    @pytest.mark.parametrize(
+        "filters,update_data,description",
+        [
+            (None, [{"value": "updated"}], "None filters"),
+            ({"name": "test"}, None, "None update_data"),
+        ],
+    )
+    def test_invalid_bulk_update(
+        self, mongodb_store, filters, update_data, description
+    ):
+        """Test bulk_update with invalid filters or update_data."""
+        with pytest.raises(Exception):
+            mongodb_store.bulk_update(TEST_COLLECTION, filters, update_data)
 
-        # Test bulk_update with None filters
-        with pytest.raises(Exception):  # Expect some kind of error
-            mongodb_store.bulk_update(TEST_COLLECTION, None, [{"value": "updated"}])
-
-        # Test bulk_update with None update_data
-        with pytest.raises(Exception):  # Expect some kind of error
-            mongodb_store.bulk_update(TEST_COLLECTION, {"name": "test"}, None)
-
-        # Test bulk_delete with None filters
-        with pytest.raises(Exception):  # Expect some kind of error
-            mongodb_store.bulk_delete(TEST_COLLECTION, None)
+    @pytest.mark.parametrize(
+        "filters,description",
+        [
+            (None, "None filters"),
+        ],
+    )
+    def test_invalid_bulk_delete(self, mongodb_store, filters, description):
+        """Test bulk_delete with invalid filters."""
+        with pytest.raises(Exception):
+            mongodb_store.bulk_delete(TEST_COLLECTION, filters)
 
     def test_connection_error_after_close(self, mongodb_store):
         """Test behavior when operations are attempted after connection is closed."""

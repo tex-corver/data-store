@@ -12,7 +12,7 @@ DUMMY_DOCUMENT = {"name": "Test User", "age": 30, "email": "test@example.com"}
 DUMMY_DOCUMENT_2 = {"name": "Test User 2", "age": 25, "email": "test2@example.com"}
 DUMMY_UPDATED_DOCUMENT = {"age": 35, "status": "updated"}
 
-TEST_COLLECTION = "test_collection_integration"
+TEST_COLLECTION = "test_collection_e2e"
 
 
 class TestBasicOperations:
@@ -34,6 +34,12 @@ class TestBasicOperations:
         assert len(results) == 1
         assert results[0]["name"] == "Test User"
         assert results[0]["age"] == 30
+
+        # Clean up - delete the inserted document
+        # Note: The cleanup_collection fixture will also clean up after the test
+        # but we're doing it explicitly here as well for good practice
+        deleted_count = mongodb_store.delete(TEST_COLLECTION, {"name": "Test User"})
+        assert deleted_count == 1
 
     def test_basic_update_operation(self, mongodb_store):
         """Test basic update operation."""

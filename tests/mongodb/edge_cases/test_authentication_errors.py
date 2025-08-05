@@ -13,6 +13,20 @@ from data_store.nosql_store.nosql_store import NoSQLStore
 TEST_COLLECTION = "test_collection_auth_errors"
 
 
+@pytest.fixture(autouse=True)
+def cleanup_auth_collection(mongodb_store):
+    """Clean up auth test collection before and after each test."""
+    try:
+        mongodb_store.delete(TEST_COLLECTION, {})
+    except Exception:
+        pass
+    yield
+    try:
+        mongodb_store.delete(TEST_COLLECTION, {})
+    except Exception:
+        pass
+
+
 class TestAuthenticationErrors:
     """Test MongoDB authentication error scenarios."""
 

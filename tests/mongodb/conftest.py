@@ -12,7 +12,7 @@ TEST_COLLECTION = "test_collection_e2e"
 def mongodb_store():
     """Create a NoSQLStore instance for MongoDB testing."""
     config = utils.get_config().get("nosql_store")
-    store = NoSQLStore(config=config)
+    store: NoSQLStore = NoSQLStore(config=config)
     store._connect()
     yield store
     store._close()

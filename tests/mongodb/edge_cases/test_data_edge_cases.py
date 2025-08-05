@@ -12,6 +12,20 @@ from data_store.nosql_store.nosql_store import NoSQLStore
 TEST_COLLECTION = "test_collection_data_edge_cases"
 
 
+@pytest.fixture(autouse=True)
+def cleanup_data_collection(mongodb_store):
+    """Clean up data edge cases test collection before and after each test."""
+    try:
+        mongodb_store.delete(TEST_COLLECTION, {})
+    except Exception:
+        pass
+    yield
+    try:
+        mongodb_store.delete(TEST_COLLECTION, {})
+    except Exception:
+        pass
+
+
 class TestDataEdgeCases:
     """Test MongoDB data handling edge cases."""
 
