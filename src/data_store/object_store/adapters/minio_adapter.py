@@ -1,4 +1,5 @@
 from typing import Any, Generator, Optional
+import datetime
 
 import minio
 import minio.commonconfig
@@ -147,6 +148,60 @@ class ObjectStoreClient(abstract.ObjectStoreClient):
             ),
         )
         return res
+
+    def _get_presigned_url(
+        self,
+        key: str,
+        bucket: str,
+        expires: int = None,
+        *args,
+        **kwargs,
+    ) -> str:
+        """Generate a presigned URL for downloading objects (GET method).
+
+        Args:
+            key (str): Object key name
+            bucket (str): Bucket name
+            expires (int, optional): Expiration time in seconds. Defaults to None
+
+        Returns:
+            str: Presigned download URL
+        """
+        expires_timedelta = datetime.timedelta(seconds=expires or 3600)  # Default 1 hour
+        return self._client.presigned_get_object(
+            bucket,
+            key,
+            expires_timedelta,
+            *args,
+            **kwargs,
+        )
+
+    def _get_presigned_upload_url(
+        self,
+        key: str,
+        bucket: str,
+        expires: int = None,
+        *args,
+        **kwargs,
+    ) -> str:
+        """Generate a presigned URL for uploading objects (PUT method).
+
+        Args:
+            key (str): Object key name
+            bucket (str): Bucket name
+            expires (int, optional): Expiration time in seconds. Defaults to None
+
+        Returns:
+            str: Presigned upload URL
+        """
+        expires_timedelta = datetime.timedelta(seconds=expires or 3600)  # Default 1 hour
+        return self._client.presigned_put_object(
+            bucket,
+            key,
+            expires_timedelta,
+            *args,
+            **kwargs,
+        )
 
 
 class ObjectStoreComponentFactory(abstract.ObjectStoreComponentFactory):
