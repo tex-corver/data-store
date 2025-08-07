@@ -140,17 +140,33 @@ class TestPresignedUrls:
 
     def test_presigned_upload_url_format(self, object_store):
         """Test that presigned upload URLs have the expected format."""
-        key = "upload-file.txt"
+        key = "test_presigned_urls/test-upload-file.txt"
         url = object_store.get_presigned_upload_url(key)
         
         # Verify URL contains expected components
-        assert url.startswith("http://192.168.0.100:9000/sandbox/upload-file.txt")
+        assert url.startswith(f"http://192.168.0.100:9000/sandbox/{key}")
         assert "X-Amz-Algorithm" in url
         assert "X-Amz-Credential" in url
         assert "X-Amz-Date" in url
         assert "X-Amz-Expires" in url
         assert "X-Amz-SignedHeaders" in url
         assert "X-Amz-Signature" in url
+
+        # try uploading a file using the presigned URL
+        import requests
+        test_content = b"This is a test file for presigned upload URL testing"
+        response = requests.put(url, data=test_content)
+        assert response.status_code == 200, f"Failed to upload file using presigned URL: {response.text}"
+
+        # Check if the file exists in the object store
+        test_object = object_store.get_object(key)
+        assert test_object is not None, "Uploaded file does not exist in the object store"
+
+        test_object_content = test_object.body
+        assert test_object_content == test_content, "Content of the uploaded file does not match the original content"
+        # clean up the uploaded file
+        object_store.delete_object(key)
+
 
     # def test_presigned_url_expiry_parameter(self, object_store):
     #     """Test that expiry parameter is properly passed through."""
