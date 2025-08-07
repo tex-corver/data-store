@@ -15,9 +15,16 @@ minio = "^7.2.7"
 tex-corver-utils = { git = "git@github.com:tex-corver/utils.git" }
 pre-commit = "3.8.0"
 pymongo = "^4.13.2"
+requests = "^2.32.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest-cov = "^6.2.1"
 pytest-xdist = "^3.8.0"
 pytest-timeout = "^2.4.0"
 
+[tool.poetry.group.doc.dependencies]
+sphinx-autodoc-typehints = "^2.4.4"
+linkify-it-py = "^2.0.3"
+sphinx = "^8.2.3"
+myst-parser = "^4.0.1"
+furo = "^2024.8.6"
