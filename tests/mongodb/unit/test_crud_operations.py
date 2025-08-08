@@ -3,10 +3,6 @@
 These tests validate insert, find, update, and delete operations.
 """
 
-import pytest
-
-from data_store.nosql_store.nosql_store import NoSQLStore
-
 # Dummy data for testing
 DUMMY_DOCUMENT = {"name": "Test User", "age": 30, "email": "test@example.com"}
 DUMMY_DOCUMENT_2 = {"name": "Test User 2", "age": 25, "email": "test2@example.com"}
@@ -18,7 +14,7 @@ TEST_COLLECTION = "test_collection_e2e"
 class TestSingleDocumentOperations:
     """Test single document operations: insert, find."""
 
-    def test_insert_document(self, mongodb_store):
+    def test_insert_document(self, mongodb_store ):
         """Test inserting a single document into a collection."""
         test_document = DUMMY_DOCUMENT.copy()
         inserted_id = mongodb_store.insert(TEST_COLLECTION, test_document)
@@ -26,7 +22,7 @@ class TestSingleDocumentOperations:
         assert isinstance(inserted_id, str)
         assert len(inserted_id) > 0
 
-    def test_find_documents_with_filters(self, mongodb_store):
+    def test_find_documents_with_filters(self, mongodb_store ):
         """Test finding documents in a collection with filters."""
         doc1 = DUMMY_DOCUMENT.copy()
         doc2 = DUMMY_DOCUMENT_2.copy()
@@ -37,7 +33,7 @@ class TestSingleDocumentOperations:
         assert results[0]["name"] == "Test User"
         assert results[0]["age"] == 30
 
-    def test_find_documents_without_filters(self, mongodb_store):
+    def test_find_documents_without_filters(self, mongodb_store ):
         """Test finding all documents without filters."""
         doc1 = DUMMY_DOCUMENT.copy()
         doc2 = DUMMY_DOCUMENT_2.copy()
@@ -46,7 +42,7 @@ class TestSingleDocumentOperations:
         results = mongodb_store.find(TEST_COLLECTION)
         assert len(results) == 2
 
-    def test_find_documents_with_projections(self, mongodb_store):
+    def test_find_documents_with_projections(self, mongodb_store ):
         """Test finding documents with specific field projections."""
         test_document = DUMMY_DOCUMENT.copy()
         mongodb_store.insert(TEST_COLLECTION, test_document)
@@ -56,7 +52,7 @@ class TestSingleDocumentOperations:
         assert "age" in results[0]
         assert "email" not in results[0]
 
-    def test_find_documents_with_skip_limit(self, mongodb_store):
+    def test_find_documents_with_skip_limit(self, mongodb_store ):
         """Test finding documents with skip and limit parameters."""
         for i in range(5):
             doc = {"name": f"User {i}", "age": 20 + i}
@@ -68,7 +64,7 @@ class TestSingleDocumentOperations:
 class TestUpdateOperations:
     """Test document update operations with and without upsert."""
 
-    def test_update_documents_without_upsert(self, mongodb_store):
+    def test_update_documents_without_upsert(self, mongodb_store ):
         """Test updating existing documents without upsert."""
         test_document = DUMMY_DOCUMENT.copy()
         mongodb_store.insert(TEST_COLLECTION, test_document)
@@ -84,7 +80,7 @@ class TestUpdateOperations:
         assert results[0]["age"] == 35
         assert results[0]["status"] == "updated"
 
-    def test_update_documents_with_upsert(self, mongodb_store):
+    def test_update_documents_with_upsert(self, mongodb_store ):
         """Test updating documents with upsert enabled for non-existing document."""
         filters = {"name": "Non Existing User"}
         update_data = {"name": "Non Existing User", "age": 40, "status": "created"}
@@ -104,7 +100,7 @@ class TestUpdateOperations:
 class TestDeletionOperations:
     """Test document deletion operations."""
 
-    def test_delete_documents(self, mongodb_store):
+    def test_delete_documents(self, mongodb_store ):
         """Test deleting documents from a collection."""
         doc1 = DUMMY_DOCUMENT.copy()
         doc2 = DUMMY_DOCUMENT_2.copy()

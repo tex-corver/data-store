@@ -14,6 +14,11 @@ from data_store.nosql_store.nosql_store import NoSQLStore
 # Test collection name
 TEST_COLLECTION = "test_collection_context_edge_cases"
 
+@pytest.fixture
+def mongodb_store() -> NoSQLStore:
+    """Create a NoSQLStore instance for MongoDB testing."""
+    store: NoSQLStore = NoSQLStore()
+    return store
 
 def cleanup_context_collection(mongodb_store):
     with mongodb_store.connect() as conn:

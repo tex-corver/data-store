@@ -10,21 +10,6 @@ from data_store.nosql_store.nosql_store import NoSQLStore
 # Test collection name
 TEST_COLLECTION = "test_collection_bulk_edge_cases"
 
-@pytest.fixture
-def mongodb_store():
-    """Create a NoSQLStore instance for MongoDB testing."""
-    store: NoSQLStore = NoSQLStore()
-    store._connect()
-    store.bulk_delete(TEST_COLLECTION, {})  # Clear the collection before tests
-
-    yield store
-    store._close()
-    store.bulk_delete(
-        TEST_COLLECTION, {}
-    )  # cheat because delete filters must not be empty
-
-
-
 class TestBulkEdgeCases:
     """Test MongoDB bulk operation edge cases."""
 
