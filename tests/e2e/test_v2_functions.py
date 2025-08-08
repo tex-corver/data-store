@@ -12,4 +12,4 @@ class TestDataStore:
             bucket="test-v2-functions",
         )
         ic(res)
-        raise Exception("test")
+        assert res
