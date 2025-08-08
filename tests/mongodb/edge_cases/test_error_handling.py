@@ -12,18 +12,19 @@ from data_store.nosql_store.nosql_store import NoSQLStore
 TEST_COLLECTION = "test_collection_error_handling"
 
 
-@pytest.fixture(autouse=True)
-def cleanup_error_collection(mongodb_store):
-    """Clean up error handling test collection before and after each test."""
-    try:
-        mongodb_store.delete(TEST_COLLECTION, {})
-    except Exception:
-        pass
-    yield
-    try:
-        mongodb_store.delete(TEST_COLLECTION, {})
-    except Exception:
-        pass
+
+@pytest.fixture
+def mongodb_store():
+    """Create a NoSQLStore instance for MongoDB testing."""
+    store: NoSQLStore = NoSQLStore()
+    store._connect()
+    store.bulk_delete(TEST_COLLECTION, {})  # Clear the collection before tests
+
+    yield store
+    store._close()
+    store.bulk_delete(
+        TEST_COLLECTION, {}
+    )  # cheat because delete filters must not be empty
 
 
 class TestErrorHandling:

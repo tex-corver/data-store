@@ -15,6 +15,7 @@ minio = "^7.2.7"
 tex-corver-utils = { git = "git@github.com:tex-corver/utils.git" }
 pre-commit = "3.8.0"
 pymongo = "^4.13.2"
+pydantic-settings = "^2.10.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest-cov = "^6.2.1"
