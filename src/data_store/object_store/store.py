@@ -6,7 +6,7 @@ import utils
 from icecream import ic
 
 __all__ = ["ObjectStore"]
-from data_store import abstract, adapters, configurations, models
+from data_store.object_store import abstract, adapters, configurations, models
 
 logger = logging.getLogger(__file__)
 

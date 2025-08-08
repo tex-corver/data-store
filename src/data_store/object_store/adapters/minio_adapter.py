@@ -9,7 +9,7 @@ import urllib3.response
 import utils
 from icecream import ic
 
-from data_store import abstract, configurations, models
+from data_store.object_store import abstract, configurations, models
 
 
 def create_object_metadata(
