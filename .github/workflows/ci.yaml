@@ -1,37 +1,17 @@
 name: Python CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
       - dev
-      - NEXT*
   pull_request:
     branches:
       - master
       - dev
 
 jobs:
-  test:
-    runs-on: arc-runner-set
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - run: |
-          docker build \
-            --tag tex-corver/data-store:test \
-            --ssh default=$HOME/.ssh/id_ed25519 \
-            --file Dockerfile .
-
-      - name: Run tests
-        run: |
-          docker run \
-            tex-corver/data-store:test \
-            sh -c 'CONFIG_PATH=$PWD/.ci-config pytest'
-
-          if [ $? -eq 0 ]; then
-            echo "Tests passed"
-          else
-            exit 1
-          fi
+  call-common-workflow:
+    uses: tex-corver/.github/.github/workflows/test-common-lib.yaml@master
+      
