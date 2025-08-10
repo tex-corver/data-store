@@ -14,8 +14,15 @@ The store is initialized with an optional configuration dictionary. If no config
 ```python
 config = {
     "framework": "mongodb",
-    "host": "localhost",
-    "port": 27017
+    "connection": {
+        "host": "localhost",
+        "port": 27017,
+        "username": "your-username",
+        "password": "your-password",
+        "auth_source": "admin",
+        "connection_timeout": 5000,
+        "database": "myapp"
+    }
 }
 store = NoSQLStore(config)
 ```
@@ -114,7 +121,7 @@ num_deleted = store.bulk_delete("users", {"status": "inactive"})
 
 The `NoSQLStore` class:
 - Utilizes an abstract factory (`NoSQLStoreComponentFactory`) to create an underlying client.
-- Supports multiple frameworks through an adapter router (`adapters.adapter_router`).
+- Supports multiple frameworks through an adapter router (`adapters.adapter_routers`).
 - Ensures proper instantiation and connection based on provided configuration.
 
 ## Configuration Setup and Best Practices

@@ -613,14 +613,14 @@ The system uses an adapter router to select the appropriate factory implementati
 
 ```python
 # NoSQL Store Adapter Router
-from data_store.nosql_store.adapters import adapter_router
+from data_store.nosql_store.adapters import adapter_routers
 
 # Object Store Adapter Router  
 from data_store.object_store.adapters import adaper_routers
 
 # Usage
-config = {"framework": "mongodb"}
-factory_class = adapter_router[config["framework"]]
+config = {"framework": "mongodb", "connection": {"host": "localhost"}}
+factory_class = adapter_routers[config["framework"]]
 factory = factory_class(config)
 client = factory.create_client()
 ```
@@ -642,8 +642,8 @@ class CustomNoSQLStoreComponentFactory(abstract.NoSQLStoreComponentFactory):
         return CustomNoSQLStore(config=self.config)
 
 # Register the adapter
-from data_store.nosql_store.adapters import adapter_router
-adapter_router["custom"] = CustomNoSQLStoreComponentFactory
+from data_store.nosql_store.adapters import adapter_routers
+adapter_routers["custom"] = CustomNoSQLStoreComponentFactory
 
 # Object Store Example
 from data_store.object_store import abstract

@@ -106,21 +106,25 @@ from data_store import NoSQLStore, ObjectStore
 # Good: Use environment variables
 config = {
     "framework": "mongodb",
-    "host": os.getenv("DB_HOST", "localhost"),
-    "port": int(os.getenv("DB_PORT", "27017")),
-    "username": os.getenv("DB_USERNAME"),
-    "password": os.getenv("DB_PASSWORD"),
-    "database": os.getenv("DB_NAME", "myapp")
+    "connection": {
+        "host": os.getenv("DB_HOST", "localhost"),
+        "port": int(os.getenv("DB_PORT", "27017")),
+        "username": os.getenv("DB_USERNAME"),
+        "password": os.getenv("DB_PASSWORD"),
+        "database": os.getenv("DB_NAME", "myapp")
+    }
 }
 
 # Bad: Hardcoded credentials
 config = {
     "framework": "mongodb",
-    "host": "localhost",
-    "port": 27017,
-    "username": "admin",  # Never hardcode credentials
-    "password": "password",  # Never hardcode credentials
-    "database": "myapp"
+    "connection": {
+        "host": "localhost",
+        "port": 27017,
+        "username": "admin",  # Never hardcode credentials
+        "password": "password",  # Never hardcode credentials
+        "database": "myapp"
+    }
 }
 ```
 
@@ -134,14 +138,17 @@ Use connection pooling for better performance:
 # Configure connection pooling
 config = {
     "framework": "mongodb",
-    "host": "localhost",
-    "port": 27017,
-    "database": "myapp",
-    "connection_pool": {
-        "max_pool_size": 100,
-        "min_pool_size": 0,
-        "max_idle_time_ms": 30000,
-        "wait_queue_timeout_ms": 1000
+    "connection": {
+        "host": "localhost",
+        "port": 27017,
+        "database": "myapp",
+        # specific settings for mongoDB, by default is not appeared in configuration model.
+        "connection_pool": {
+            "max_pool_size": 100,
+            "min_pool_size": 0,
+            "max_idle_time_ms": 30000,
+            "wait_queue_timeout_ms": 1000
+        }
     }
 }
 

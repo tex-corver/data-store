@@ -22,13 +22,13 @@ The adapter router maps framework names to their corresponding factory classes:
 
 ```python
 # NoSQL Store Adapter Router
-from data_store.nosql_store.adapters import adapter_router
+from data_store.nosql_store.adapters import adapter_routers
 
 # Object Store Adapter Router
 from data_store.object_store.adapters import adaper_routers
 
 # Example mappings
-adapter_router = {
+adapter_routers = {
     "mongodb": mongodb_adapter.NoSQLStoreComponentFactory,
     "couchdb": couchdb_adapter.NoSQLStoreComponentFactory,
     "dynamodb": dynamodb_adapter.NoSQLStoreComponentFactory
@@ -46,7 +46,7 @@ To add support for new storage backends:
 
 ```python
 # Register new adapter
-adapter_router["new_framework"] = NewFrameworkAdapterFactory
+adapter_routers["new_framework"] = NewFrameworkAdapterFactory
 adaper_routers["new_storage"] = NewStorageAdapterFactory
 ```
 
@@ -1028,10 +1028,10 @@ class CustomNoSQLStoreComponentFactory(abstract.NoSQLStoreComponentFactory):
 #### 3. Register the Adapter
 
 ```python
-from data_store.nosql_store.adapters import adapter_router
+from data_store.nosql_store.adapters import adapter_routers
 
 # Register the custom adapter
-adapter_router["custom"] = CustomNoSQLStoreComponentFactory
+adapter_routers["custom"] = CustomNoSQLStoreComponentFactory
 ```
 
 ### Object Store Custom Adapter Example
