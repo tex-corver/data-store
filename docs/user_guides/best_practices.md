@@ -2,17 +2,6 @@
 
 This guide provides best practices for using the tex-corver-data-store library in production environments.
 
-## Table of Contents
-
-- [Configuration Management](#configuration-management)
-- [Connection Management](#connection-management)
-- [Error Handling](#error-handling)
-- [Performance Optimization](#performance-optimization)
-- [Security Considerations](#security-considerations)
-- [Testing Strategies](#testing-strategies)
-- [Monitoring and Logging](#monitoring-and-logging)
-- [Deployment Considerations](#deployment-considerations)
-
 ## Configuration Management
 
 ### Environment-Based Configuration

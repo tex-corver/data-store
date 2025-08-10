@@ -16,14 +16,6 @@ The API reference contains comprehensive documentation for all classes, methods,
 
 Use the table of contents on the left to navigate between different sections, or use the search functionality to find specific topics.
 
-## Quick Links
-
-- [Abstract Base Classes](abstract_base_classes) - Core interfaces and design patterns
-- [Configuration Classes](configuration_classes) - Configuration models and validation
-- [Models](models) - Data structures and schemas
-- [Adapters](adapters) - Adapter implementations and extension points
-- [Modules](modules) - Complete module documentation
-
 ## API Documentation Format
 
 Each API section includes:
@@ -66,3 +58,12 @@ If you find any issues with the API documentation or have suggestions for improv
 - **Development**: Information for contributors and extenders
 
 For getting started information, see the {doc}`../getting_started` guide.
+
+```{toctree}
+:maxdepth: 1
+:caption: API Reference
+
+abstract_base_classes
+adapters
+configuration_classes
+models

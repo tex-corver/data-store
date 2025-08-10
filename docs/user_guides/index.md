@@ -45,3 +45,14 @@ If you're new to the library, start with the {doc}`../getting_started` guide for
 Use the table of contents on the left to navigate between guides, or use the search functionality to find specific topics.
 
 For API reference documentation, see the {doc}`../api_reference/index` section.
+
+```{toctree}
+:maxdepth: 1
+:caption: User Guides
+
+nosql_store
+object_store
+presigned_urls
+presigned_urls_usage
+best_practices
+```

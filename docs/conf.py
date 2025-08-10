@@ -13,8 +13,8 @@ from pathlib import Path
 # Add the src directory to the path so we can import the data_store module
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-project = "tex-corver-data-store"
-copyright = "2024, Long Le"
+project = "data-store"
+copyright = "2025, Long Le"
 author = "Long Le"
 release = "0.1.0"
 
@@ -59,7 +59,7 @@ myst_enable_extensions = [
 
 myst_heading_anchors = 3
 myst_substitutions = {
-    "project_name": "tex-corver-data-store",
+    "project_name": "data-store",
 }
 
 # Intersphinx mapping
@@ -99,7 +99,7 @@ todo_include_todos = True
 
 # Source suffix
 source_suffix = {
-    ".rst": "restructuredtext",
+    # ".rst": "restructuredtext",
     ".md": "markdown",
 }
 

@@ -2,15 +2,6 @@
 
 This section provides information for developers who want to contribute to the tex-corver-data-store library or extend its functionality.
 
-## Table of Contents
-
-- [Architecture Overview](#architecture-overview)
-- [Extending the Library](#extending-the-library)
-- [Testing Guidelines](#testing-guidelines)
-- [Contributing Guidelines](#contributing-guidelines)
-- [Code Style and Standards](#code-style-and-standards)
-- [Release Process](#release-process)
-
 ## Architecture Overview
 
 The tex-corver-data-store library is built around a modular architecture that supports multiple storage backends through a unified interface.
