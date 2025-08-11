@@ -117,12 +117,6 @@ num_deleted = store.bulk_delete("users", {"status": "inactive"})
 - A `RuntimeError` is raised for operational failures.
 - It is recommended to handle these exceptions to maintain application stability.
 
-## Integration with Base Classes and Adapters
-
-The `NoSQLStore` class:
-- Utilizes an abstract factory (`NoSQLStoreComponentFactory`) to create an underlying client.
-- Supports multiple frameworks through an adapter router (`adapters.adapter_routers`).
-- Ensures proper instantiation and connection based on provided configuration.
 
 ## Configuration Setup and Best Practices
 
