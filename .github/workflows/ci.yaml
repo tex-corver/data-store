@@ -6,7 +6,6 @@ on:
     branches:
       - master
       - dev
-      - NEXT-830
   pull_request:
     branches:
       - master
