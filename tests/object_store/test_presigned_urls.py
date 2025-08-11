@@ -1,6 +1,5 @@
 import pytest
 from data_store.object_store import ObjectStore
-from data_store.object_store.configurations import ObjectStoreConfiguration, ObjectStoreConnectionConfiguration
 
 
 class TestPresignedUrls:

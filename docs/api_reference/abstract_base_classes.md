@@ -474,7 +474,7 @@ def _get_presigned_url(
     Args:
         key (str): Object key name
         bucket (str): Bucket name
-        expires (int, optional): Expiration time in seconds. Defaults to None
+        expires (int): Expiration time in seconds. Defaults to 3600 (1 hour)
         
     Returns:
         str: Presigned download URL
@@ -486,7 +486,7 @@ def _get_presigned_upload_url(
     self,
     key: str,
     bucket: str,
-    expires: int = None,
+    expires: int = 3600,
     *args,
     **kwargs,
 ) -> str:
@@ -495,8 +495,8 @@ def _get_presigned_upload_url(
     Args:
         key (str): Object key name
         bucket (str): Bucket name
-        expires (int, optional): Expiration time in seconds. Defaults to None
-        
+        expires (int): Expiration time in seconds. Defaults to 3600 (1 hour)
+
     Returns:
         str: Presigned upload URL
     """

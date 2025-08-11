@@ -227,7 +227,7 @@ class ObjectStore:
         self,
         key: str,
         bucket: str = None,
-        expires: int = None,
+        expires: int = 3600,
         *args,
         **kwargs,
     ) -> str:
@@ -236,7 +236,7 @@ class ObjectStore:
         Args:
             key (str): Object key name
             bucket (str, optional): Bucket name. Defaults to root_bucket
-            expires (int, optional): Expiration time in seconds. Defaults to None
+            expires (int): Expiration time in seconds. Defaults to 3600 (1 hour)
 
         Returns:
             str: Presigned download URL
@@ -252,7 +252,7 @@ class ObjectStore:
         self,
         key: str,
         bucket: str = None,
-        expires: int = None,
+        expires: int = 3600,
         *args,
         **kwargs,
     ) -> str:

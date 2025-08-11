@@ -197,7 +197,7 @@ class ObjectStoreClient(abc.ABC):
         self,
         key: str,
         bucket: str = None,
-        expires: int = None,
+        expires: int = 3600,
         *args,
         **kwargs,
     ) -> str:
@@ -206,7 +206,7 @@ class ObjectStoreClient(abc.ABC):
         Args:
             key (str): Object key name
             bucket (str, optional): Bucket name. Defaults to root_bucket
-            expires (int, optional): Expiration time in seconds. Defaults to None
+            expires (int): Expiration time in seconds. Defaults to 3600 (1 hour)
 
         Returns:
             str: Presigned download URL
@@ -224,7 +224,7 @@ class ObjectStoreClient(abc.ABC):
         self,
         key: str,
         bucket: str = None,
-        expires: int = None,
+        expires: int = 3600,
         *args,
         **kwargs,
     ) -> str:
@@ -233,7 +233,7 @@ class ObjectStoreClient(abc.ABC):
         Args:
             key (str): Object key name
             bucket (str, optional): Bucket name. Defaults to root_bucket
-            expires (int, optional): Expiration time in seconds. Defaults to None
+            expires (int): Expiration time in seconds. Defaults to 3600 (1 hour)
 
         Returns:
             str: Presigned upload URL
@@ -252,7 +252,7 @@ class ObjectStoreClient(abc.ABC):
         self,
         key: str,
         bucket: str,
-        expires: int = None,
+        expires: int,
         *args,
         **kwargs,
     ) -> str:
@@ -261,7 +261,7 @@ class ObjectStoreClient(abc.ABC):
         Args:
             key (str): Object key name
             bucket (str): Bucket name
-            expires (int, optional): Expiration time in seconds. Defaults to None
+            expires (int): Expiration time in seconds. Must have a default value.
 
         Returns:
             str: Presigned download URL
@@ -273,7 +273,7 @@ class ObjectStoreClient(abc.ABC):
         self,
         key: str,
         bucket: str,
-        expires: int = None,
+        expires: int,
         *args,
         **kwargs,
     ) -> str:
@@ -282,7 +282,7 @@ class ObjectStoreClient(abc.ABC):
         Args:
             key (str): Object key name
             bucket (str): Bucket name
-            expires (int, optional): Expiration time in seconds. Defaults to None
+            expires (int): Expiration time in seconds. Must have a default value.
 
         Returns:
             str: Presigned upload URL

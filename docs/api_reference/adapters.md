@@ -870,7 +870,7 @@ def _get_presigned_url(
     self,
     key: str,
     bucket: str,
-    expires: int = None,
+    expires: int,
     *args,
     **kwargs,
 ) -> str:
@@ -879,7 +879,7 @@ def _get_presigned_url(
     Args:
         key (str): Object key name
         bucket (str): Bucket name
-        expires (int, optional): Expiration time in seconds. Defaults to None
+        expires (int): Expiration time in seconds. Must be provided
         *args: Additional positional arguments
         **kwargs: Additional keyword arguments including response_headers
         
@@ -891,7 +891,6 @@ def _get_presigned_url(
     
     try:
         response = self._client.get_presigned_url(
-            method="GET",
             bucket_name=bucket,
             object_name=key,
             expires=expires,
@@ -933,8 +932,7 @@ def _get_presigned_upload_url(
         self._client = self._init_client()
     
     try:
-        response = self._client.get_presigned_url(
-            method="PUT",
+        response = self._client._get_presigned_upload_url(
             bucket_name=bucket,
             object_name=key,
             expires=expires,
