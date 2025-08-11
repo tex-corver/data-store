@@ -4,27 +4,11 @@ These tests validate behavior with edge cases in bulk operations.
 """
 
 import pytest
-from bson import ObjectId
 
 from data_store.nosql_store.nosql_store import NoSQLStore
 
 # Test collection name
 TEST_COLLECTION = "test_collection_bulk_edge_cases"
-
-
-@pytest.fixture(autouse=True)
-def cleanup_bulk_collection(mongodb_store):
-    """Clean up bulk test collection before and after each test."""
-    try:
-        mongodb_store.delete(TEST_COLLECTION, {})
-    except Exception:
-        pass
-    yield
-    try:
-        mongodb_store.delete(TEST_COLLECTION, {})
-    except Exception:
-        pass
-
 
 class TestBulkEdgeCases:
     """Test MongoDB bulk operation edge cases."""

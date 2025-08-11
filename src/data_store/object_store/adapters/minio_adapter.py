@@ -1,3 +1,5 @@
+import io
+import tempfile
 from typing import Any, Generator, Optional
 import datetime
 
@@ -202,6 +204,26 @@ class ObjectStoreClient(abstract.ObjectStoreClient):
             *args,
             **kwargs,
         )
+
+    def _put_object_v2(
+        self,
+        data: bytes,
+        key: str,
+        bucket: str,
+        length: int = -1,
+        *args,
+        **kwargs,
+    ):
+        res = self._client.put_object(
+            bucket_name=bucket,
+            object_name=key,
+            data=io.BytesIO(data),
+            length=length,
+            part_size=10 * 1024 * 1024,
+            *args,
+            **kwargs,
+        )
+        return res
 
 
 class ObjectStoreComponentFactory(abstract.ObjectStoreComponentFactory):

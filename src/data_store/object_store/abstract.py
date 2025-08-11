@@ -123,6 +123,23 @@ class ObjectStoreClient(abc.ABC):
             **kwargs,
         )
 
+    def put_object_v2(
+        self,
+        data: bytes,
+        key: str,
+        bucket: str | None = None,
+        *args,
+        **kwargs,
+    ):
+        bucket = bucket or self.root_bucket
+        return self._put_object_v2(
+            data=data,
+            key=key,
+            bucket=bucket,
+            *args,
+            **kwargs,
+        )
+
     def copy_object(
         self,
         src_object: str,
@@ -287,6 +304,18 @@ class ObjectStoreClient(abc.ABC):
         Returns:
             str: Presigned upload URL
         """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _put_object_v2(
+        self,
+        data: bytes,
+        key: str,
+        bucket: str | None = None,
+        length: int = -1,
+        *args,
+        **kwargs,
+    ):
         raise NotImplementedError
 
 
