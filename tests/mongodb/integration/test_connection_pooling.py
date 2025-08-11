@@ -12,21 +12,6 @@ from data_store.nosql_store.nosql_store import NoSQLStore
 DUMMY_DOCUMENT = {"name": "Test User", "age": 30, "email": "test@example.com"}
 TEST_COLLECTION = "test_collection_pooling"
 
-
-@pytest.fixture(autouse=True)
-def cleanup_pooling_collection(mongodb_store):
-    """Clean up connection pooling test collection before and after each test."""
-    try:
-        mongodb_store.delete(TEST_COLLECTION, {})
-    except Exception:
-        pass
-    yield
-    try:
-        mongodb_store.delete(TEST_COLLECTION, {})
-    except Exception:
-        pass
-
-
 @pytest.mark.skip("Connection pooling is not supported yet")
 class TestConnectionPooling:
     """Test MongoDB connection pooling functionality."""
