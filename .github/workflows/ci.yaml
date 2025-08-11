@@ -6,6 +6,7 @@ on:
     branches:
       - master
       - dev
+      - NEXT-830
   pull_request:
     branches:
       - master
@@ -14,4 +15,5 @@ on:
 jobs:
   call-common-workflow:
     uses: tex-corver/.github/.github/workflows/test-common-lib.yaml@master
-      
+      with:
+        test-command: 'exit 1'
