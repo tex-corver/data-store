@@ -57,7 +57,7 @@ If you find any issues with the API documentation or have suggestions for improv
 - **Best Practices**: Guidelines for production use
 - **Development**: Information for contributors and extenders
 
-For getting started information, see the {doc}`../getting_started` guide.
+For getting started information, see the {doc}`../index` guide.
 
 ```{toctree}
 :maxdepth: 1
@@ -67,3 +67,4 @@ abstract_base_classes
 adapters
 configuration_classes
 models
+presigned_urls

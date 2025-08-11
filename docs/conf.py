@@ -113,3 +113,5 @@ myst_gfm_only = False
 myst_dmath_double_inline = False
 myst_update_mathjax = False
 myst_url_schemes = ("http", "https", "mailto")
+
+suppress_warnings = ["myst.strikethrough"]

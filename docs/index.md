@@ -5,7 +5,7 @@
 data-store is a Python library that provides a unified interface for multiple storage backends, including:
 
 - **NoSQL databases** (MongoDB, ~~CouchDB, DynamoDB~~)
-- **Object storage** (MinIO, ~~AWS S3~~)
+- **Object storage** (MinIO, AWS S3)
 - ~~**SQL databases** (PostgreSQL, MySQL, SQLite)~~
 - ~~**Vector databases** (for AI/ML applications)~~
 
@@ -112,32 +112,42 @@ for file_meta in store.list_files(prefix="uploads/"):
 
 The library uses Pydantic models for configuration, providing type safety and validation.
 
+### Configuration Folder
+
+Default folders for configuration files are: `.configs/`, you can change it by set the environment variable `CONFIG_PATH`.
+
+We only use YAML files for configuration. For different file types, you must implement your own.
+
+The file name doesn't matter, we only read the content of the file and load it into the configuration model.
+
 ### Configuration Files
 
-Create a configuration file (e.g., `config.yaml`):
+Create a configuration file (e.g., `.configs/data_store.yaml`):
 
 ```yaml
 data_store:
-  nosql:
-    framework: mongodb
-    connection:
-      host: localhost
-      port: 27017
-      username: your-username
-      password: your-password
-      auth_source: admin
-      connection_timeout: 5000
-      database: myapp
-  
-  object_store:
-    framework: minio
-    root_bucket: my-app-data
-    connection:
+  framework: minio
+  root_bucket: my-app-data
+  connection:
       endpoint: localhost:9000
       access_key: your-access-key
       secret_key: your-secret-key
       secure: false
+nosql_store:
+  framework: mongodb
+  connection:
+    host: localhost
+    port: 27017
+    username: your-username
+    password: your-password
+    auth_source: admin
+    connection_timeout: 5000
+    database: myapp
+    
 ```
+
+I keep this format for backward compatibility and will load by default from `.configs/data_store.yaml`.
+
 
 ## Codebase Design
 

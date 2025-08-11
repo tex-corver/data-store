@@ -572,4 +572,12 @@ For each release:
 - **Best Practices**: Guidelines for production use
 - **API Reference**: Detailed API documentation
 
-For getting started information, see the {doc}`../getting_started` guide.
+For getting started information, see the {doc}`../index` guide.
+
+```{toctree}
+:maxdepth: 1
+:caption: Development
+
+best_practices
+nosql_store
+object_store
