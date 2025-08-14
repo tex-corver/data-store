@@ -1,62 +1,75 @@
+import os
+import tempfile
+
 import pytest
+import requests
+
 from data_store.object_store import ObjectStore
 
 
-class TestPresignedUrls:
-    """Test suite for MinIO presigned URL functionality."""
+@pytest.fixture
+def object_store():
+    """Create an ObjectStore instance with real configuration.
 
-    @pytest.fixture(scope="class")
-    def object_store(self):
-        """Create an ObjectStore instance with real configuration."""
-        store = ObjectStore()
-        self.setup_method()
-        self.store = store
+    Yields:
+        ObjectStore: Configured ObjectStore instance for testing
+    """
+    print(f"DEBUG: object_store fixture called")
+
+    store = ObjectStore()
+    print(f"DEBUG: store created: {type(store)}")
+    print(f"DEBUG: store has upload_object: {hasattr(store, 'upload_object')}")
+
+    # Setup test data
+    test_key = "test_presigned_urls/test-file.txt"
+    test_content = b"This is a test file for presigned URL testing"
+
+    # Create a temporary file with test content
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file.write(test_content)
+        temp_file_path = temp_file.name
+
+    try:
+        # Upload test file to the object store
+        store.upload_object(file_path=temp_file_path, key=test_key)
         yield store
-        self.teardown_method()
-
-    def setup_method(self):
-        """Setup method to upload a test file before each test."""
-        import tempfile
-        import os
-        
-        # Initialize the store and test data
-        self.store = ObjectStore()
-        self.test_key = "test_presigned_urls/test-file.txt"
-        self.test_content = b"This is a test file for presigned URL testing"
-        
-        # Create a temporary file with test content
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_file.write(self.test_content)
-            temp_file_path = temp_file.name
-        
+    finally:
+        # Clean up the temporary file from local filesystem
+        os.unlink(temp_file_path)
+        # Teardown test data
         try:
-            # Upload test file to the object store
-            self.store.upload_object(
-                file_path=temp_file_path,
-                key=self.test_key
-            )
-        finally:
-            # Clean up the temporary file from local filesystem
-            os.unlink(temp_file_path)
+            store.delete_object(key=test_key)
+        except Exception as e:
+            # Log the error but don't fail the test
+            print(f"Warning: Failed to cleanup test file {test_key}: {e}")
 
-    def teardown_method(self):
-        """Teardown method to delete the test file after each test."""
-        if hasattr(self, 'store') and hasattr(self, 'test_key'):
-            try:
-                # Delete the test file from object store
-                self.store.delete_object(key=self.test_key)
-            except Exception as e:
-                # Log the error but don't fail the test
-                print(f"Warning: Failed to cleanup test file {self.test_key}: {e}")
 
-    def test_get_presigned_url_default_bucket(self):
-        """Test generating a presigned URL with default bucket."""
+class BasePresignedUrlTest:
+    test_key = "test_presigned_urls/test-file.txt"
+    test_content = b"This is a test file for presigned URL testing"
+
+    """Base class for presigned URL tests with common setup and teardown."""
+
+
+class TestPresignedUrlFormat(BasePresignedUrlTest):
+    """Test suite for presigned URL format validation."""
+
+    def test_get_presigned_url_default_bucket_format(self, object_store):
+        """Test that presigned URLs have the expected format with default bucket.
+
+        Args:
+            object_store: ObjectStore instance for testing
+        """
+        # Arrange
         key = self.test_key
-        url = self.store.get_presigned_url(key) 
-        # Verify the URL is returned
+
+        # Act
+        url = object_store.get_presigned_url(key)
+
+        # Assert
         assert isinstance(url, str)
-        assert f"http://192.168.0.100:9000/sandbox/{self.test_key}" in url
-        
+        assert f"http://192.168.0.100:9000/sandbox/{key}" in url
+
         # Verify the URL contains expected query parameters
         assert "X-Amz-Algorithm" in url
         assert "X-Amz-Credential" in url
@@ -65,33 +78,22 @@ class TestPresignedUrls:
         assert "X-Amz-SignedHeaders" in url
         assert "X-Amz-Signature" in url
 
-    # def test_get_presigned_url_custom_bucket(self, object_store):
-    #     """Test generating a presigned URL with custom bucket."""
-    #     key = "test-file.txt"
-    #     bucket = "custom-bucket"
-    #     url = object_store.get_presigned_url(key, bucket)
-        
-    #     # Verify the URL is returned
-    #     assert isinstance(url, str)
-    #     assert "https://192.168.0.100:9000/custom-bucket/test-file.txt" in url
-        
-    #     # Verify the URL contains expected query parameters
-    #     assert "X-Amz-Algorithm" in url
-    #     assert "X-Amz-Credential" in url
-    #     assert "X-Amz-Date" in url
-    #     assert "X-Amz-Expires" in url
-    #     assert "X-Amz-SignedHeaders" in url
-    #     assert "X-Amz-Signature" in url
+    def test_get_presigned_url_with_expiry_format(self, object_store):
+        """Test that presigned URLs have the expected format with custom expiry.
 
-    def test_get_presigned_url_with_expiry(self, object_store):
-        """Test generating a presigned URL with custom expiry time."""
+        Args:
+            object_store: ObjectStore instance for testing
+        """
+        # Arrange
         key = self.test_key
         expires = 7200  # 2 hours
+
+        # Act
         url = object_store.get_presigned_url(key, expires=expires)
-        
-        # Verify the URL is returned
+
+        # Assert
         assert isinstance(url, str)
-        assert f"http://192.168.0.100:9000/sandbox/{self.test_key}" in url
+        assert f"http://192.168.0.100:9000/sandbox/{key}" in url
 
         # Verify the URL contains expected query parameters
         assert "X-Amz-Algorithm" in url
@@ -101,48 +103,19 @@ class TestPresignedUrls:
         assert "X-Amz-SignedHeaders" in url
         assert "X-Amz-Signature" in url
 
-
-    # def test_get_presigned_url_with_args_kwargs(self, object_store):
-    #     """Test generating a presigned URL with additional arguments."""
-    #     key = "test-file.txt"
-    #     url = object_store.get_presigned_url(key, expires=3600, extra_arg="value", another_arg=123)
-        
-    #     # Verify the URL is returned
-    #     assert isinstance(url, str)
-    #     assert "https://192.168.0.100:9000/sandbox/test-file.txt" in url
-        
-    #     # Verify the URL contains expected query parameters
-    #     assert "X-Amz-Algorithm" in url
-    #     assert "X-Amz-Credential" in url
-    #     assert "X-Amz-Date" in url
-    #     assert "X-Amz-Expires" in url
-    #     assert "X-Amz-SignedHeaders" in url
-    #     assert "X-Amz-Signature" in url
-
-    # def test_get_presigned_upload_url_with_args_kwargs(self, object_store):
-    #     """Test generating a presigned upload URL with additional arguments."""
-    #     key = "upload-file.txt"
-    #     url = object_store.get_presigned_upload_url(key, expires=7200, extra_arg="value", another_arg=123)
-        
-    #     # Verify the URL is returned
-    #     assert isinstance(url, str)
-    #     assert "https://192.168.0.100:9000/sandbox/upload-file.txt" in url
-        
-    #     # Verify the URL contains expected query parameters
-    #     assert "X-Amz-Algorithm" in url
-    #     assert "X-Amz-Credential" in url
-    #     assert "X-Amz-Date" in url
-    #     assert "X-Amz-Expires" in url
-    #     assert "X-Amz-SignedHeaders" in url
-    #     assert "X-Amz-Signature" in url
-
-
     def test_presigned_upload_url_format(self, object_store):
-        """Test that presigned upload URLs have the expected format."""
+        """Test that presigned upload URLs have the expected format.
+
+        Args:
+            object_store: ObjectStore instance for testing
+        """
+        # Arrange
         key = "test_presigned_urls/test-upload-file.txt"
+
+        # Act
         url = object_store.get_presigned_upload_url(key)
-        
-        # Verify URL contains expected components
+
+        # Assert
         assert url.startswith(f"http://192.168.0.100:9000/sandbox/{key}")
         assert "X-Amz-Algorithm" in url
         assert "X-Amz-Credential" in url
@@ -151,122 +124,62 @@ class TestPresignedUrls:
         assert "X-Amz-SignedHeaders" in url
         assert "X-Amz-Signature" in url
 
-        # try uploading a file using the presigned URL
-        import requests
+
+class TestPresignedUrlUtilities(BasePresignedUrlTest):
+    """Test suite for presigned URL utility functionality."""
+
+    def test_presigned_upload_utility(self, object_store):
+        """Test that presigned upload URLs work correctly for file uploads.
+
+        Args:
+            object_store: ObjectStore instance for testing
+        """
+        # Arrange
+        key = "test_presigned_urls/test-upload-file.txt"
         test_content = b"This is a test file for presigned upload URL testing"
+        url = object_store.get_presigned_upload_url(key)
+
+        # Act
         response = requests.put(url, data=test_content)
-        assert response.status_code == 200, f"Failed to upload file using presigned URL: {response.text}"
+
+        # Assert
+        assert response.status_code == 200, (
+            f"Failed to upload file using presigned URL: {response.text}"
+        )
 
         # Check if the file exists in the object store
         test_object = object_store.get_object(key)
-        assert test_object is not None, "Uploaded file does not exist in the object store"
+        assert test_object is not None, (
+            "Uploaded file does not exist in the object store"
+        )
 
         test_object_content = test_object.body
-        assert test_object_content == test_content, "Content of the uploaded file does not match the original content"
-        # clean up the uploaded file
+        assert test_object_content == test_content, (
+            "Content of the uploaded file does not match the original content"
+        )
+
+        # Clean up the uploaded file
         object_store.delete_object(key)
 
+    def test_presigned_url_access_utility(self, object_store):
+        """Test that presigned URLs can be used to access objects.
 
-    # def test_presigned_url_expiry_parameter(self, object_store):
-    #     """Test that expiry parameter is properly passed through."""
-    #     key = "test-file.txt"
-    #     test_expires = 1800
-        
-    #     # Test with expiry parameter
-    #     url_with_expiry = object_store.get_presigned_url(key, expires=test_expires)
-    #     assert "X-Amz-Expires" in url_with_expiry
-        
-    #     # Test without expiry parameter (should use default)
-    #     url_default = object_store.get_presigned_url(key)
-    #     assert "X-Amz-Expires" in url_default
+        Args:
+            object_store: ObjectStore instance for testing
+        """
+        # Arrange
+        key = self.test_key
+        url = object_store.get_presigned_url(key)
 
+        # Act
+        response = requests.get(url)
 
-    # def test_presigned_url_for_existing_file(self, object_store):
-    #     """Test generating a presigned URL for the uploaded test file."""
-    #     # Use the file uploaded in setup_method
-    #     url = object_store.get_presigned_url(self.test_key)
-        
-    #     # Verify the URL is returned
-    #     assert isinstance(url, str)
-    #     assert f"https://192.168.0.100:9000/sandbox/{self.test_key}" in url
-        
-    #     # Verify the URL contains expected query parameters
-    #     assert "X-Amz-Algorithm" in url
-    #     assert "X-Amz-Credential" in url
-    #     assert "X-Amz-Date" in url
-    #     assert "X-Amz-Expires" in url
-    #     assert "X-Amz-SignedHeaders" in url
-    #     assert "X-Amz-Signature" in url
+        # Assert
+        assert response.status_code == 200, (
+            f"Failed to access file using presigned URL: {response.text}"
+        )
 
-    # def test_presigned_upload_url_for_new_file(self, object_store):
-    #     """Test generating a presigned upload URL for a new file."""
-    #     new_key = "test_presigned_urls/upload-test.txt"
-    #     url = object_store.get_presigned_upload_url(new_key)
-        
-    #     # Verify the URL is returned
-    #     assert isinstance(url, str)
-    #     assert f"https://192.168.0.100:9000/sandbox/{new_key}" in url
-        
-    #     # Verify the URL contains expected query parameters for PUT method
-    #     assert "X-Amz-Algorithm" in url
-    #     assert "X-Amz-Credential" in url
-    #     assert "X-Amz-Date" in url
-    #     assert "X-Amz-Expires" in url
-    #     assert "X-Amz-SignedHeaders" in url
-    #     assert "X-Amz-Signature" in url
-
-    # def test_presigned_url_with_real_file_custom_bucket(self, object_store):
-    #     """Test presigned URL generation with real file in custom bucket."""
-    #     # Upload a file to a custom bucket for testing
-    #     import tempfile
-    #     import os
-        
-    #     custom_bucket = "test-bucket"
-    #     custom_key = "test_presigned_urls/custom-bucket-file.txt"
-    #     custom_content = b"Custom bucket test content"
-        
-    #     # Create temporary file
-    #     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-    #         temp_file.write(custom_content)
-    #         temp_file_path = temp_file.name
-        
-    #     try:
-    #         # Upload to custom bucket
-    #         object_store.upload_object(
-    #             file_path=temp_file_path,
-    #             key=custom_key,
-    #             bucket=custom_bucket
-    #         )
-            
-    #         # Generate presigned URL for the custom bucket file
-    #         url = object_store.get_presigned_url(custom_key, bucket=custom_bucket)
-            
-    #         # Verify the URL
-    #         assert isinstance(url, str)
-    #         assert f"https://192.168.0.100:9000/{custom_bucket}/{custom_key}" in url
-    #         assert "X-Amz-Algorithm" in url
-    #         assert "X-Amz-Signature" in url
-            
-    #         # Clean up the custom bucket file
-    #         object_store.delete_object(key=custom_key, bucket=custom_bucket)
-            
-    #     finally:
-    #         # Clean up temporary file
-    #         os.unlink(temp_file_path)
-
-    # def test_presigned_url_expiry_with_real_file(self, object_store):
-    #     """Test that different expiry times work with real files."""
-    #     # Test with the uploaded file from setup_method
-    #     short_expiry_url = object_store.get_presigned_url(self.test_key, expires=300)  # 5 minutes
-    #     long_expiry_url = object_store.get_presigned_url(self.test_key, expires=7200)  # 2 hours
-        
-    #     # Both URLs should be valid and different
-    #     assert isinstance(short_expiry_url, str)
-    #     assert isinstance(long_expiry_url, str)
-    #     assert short_expiry_url != long_expiry_url
-        
-    #     # Both should contain the same base URL but different expiry values
-    #     assert f"sandbox/{self.test_key}" in short_expiry_url
-    #     assert f"sandbox/{self.test_key}" in long_expiry_url
-    #     assert "X-Amz-Expires" in short_expiry_url
-    #     assert "X-Amz-Expires" in long_expiry_url
+        # Verify the content matches
+        assert response.content == object_store.get_object(key).body, (
+            "Content accessed via presigned URL does not match original content"
+        )

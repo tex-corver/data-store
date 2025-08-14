@@ -163,3 +163,7 @@ cython_debug/
 projectBrief*
 notebooks/
 _build/
+
+# Sphinx Documentation build
+*_static/
+*_templates/
