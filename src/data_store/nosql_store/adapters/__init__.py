@@ -1,3 +1,3 @@
 from . import mongodb_adapter
 
-adapter_router = {"mongodb": mongodb_adapter.NoSQLStoreComponentFactory}
+adapter_routers = {"mongodb": mongodb_adapter.NoSQLStoreComponentFactory}
