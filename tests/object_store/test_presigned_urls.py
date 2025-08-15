@@ -14,11 +14,8 @@ def object_store():
     Yields:
         ObjectStore: Configured ObjectStore instance for testing
     """
-    print(f"DEBUG: object_store fixture called")
 
     store = ObjectStore()
-    print(f"DEBUG: store created: {type(store)}")
-    print(f"DEBUG: store has upload_object: {hasattr(store, 'upload_object')}")
 
     # Setup test data
     test_key = "test_presigned_urls/test-file.txt"
@@ -128,7 +125,7 @@ class TestPresignedUrlFormat(BasePresignedUrlTest):
 class TestPresignedUrlUtilities(BasePresignedUrlTest):
     """Test suite for presigned URL utility functionality."""
 
-    def test_presigned_upload_utility(self, object_store):
+    def test_presigned_upload(self, object_store):
         """Test that presigned upload URLs work correctly for file uploads.
 
         Args:
@@ -161,7 +158,7 @@ class TestPresignedUrlUtilities(BasePresignedUrlTest):
         # Clean up the uploaded file
         object_store.delete_object(key)
 
-    def test_presigned_url_access_utility(self, object_store):
+    def test_presigned_url_get(self, object_store):
         """Test that presigned URLs can be used to access objects.
 
         Args:
