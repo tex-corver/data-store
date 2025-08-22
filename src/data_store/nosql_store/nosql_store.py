@@ -263,7 +263,7 @@ class NoSQLStore:
         else:
             framework_str = str(framework)
 
-        if framework_str not in adapters.adapter_router:
+        if framework_str not in adapters.adapter_routers:
             raise ValueError(f"Doesn't support framework: {framework_str}")
 
-        return adapters.adapter_router[framework_str](self.config, *args, **kwargs)
+        return adapters.adapter_routers[framework_str](self.config, *args, **kwargs)

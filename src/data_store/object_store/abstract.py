@@ -210,6 +210,102 @@ class ObjectStoreClient(abc.ABC):
     ):
         raise NotImplementedError
 
+    def get_presigned_url(
+        self,
+        key: str,
+        bucket: str = None,
+        expires: int = 3600,
+        *args,
+        **kwargs,
+    ) -> str:
+        """Generate a presigned URL for downloading objects (GET method).
+
+        Args:
+            key (str): Object key name
+            bucket (str, optional): Bucket name. Defaults to root_bucket
+            expires (int): Expiration time in seconds. Defaults to 3600 (1 hour)
+
+        Returns:
+            str: Presigned download URL
+
+        Examples:
+            >>> url = client.get_presigned_url("file.txt")
+            >>> print(url)
+            "https://minio.example.com/bucket/file.txt?X-Amz-Algorithm=..."
+        """
+        if bucket is None:
+            bucket = self.root_bucket
+        return self._get_presigned_url(key, bucket, expires, *args, **kwargs)
+
+    def get_presigned_upload_url(
+        self,
+        key: str,
+        bucket: str = None,
+        expires: int = 3600,
+        *args,
+        **kwargs,
+    ) -> str:
+        """Generate a presigned URL for uploading objects (PUT method).
+
+        Args:
+            key (str): Object key name
+            bucket (str, optional): Bucket name. Defaults to root_bucket
+            expires (int): Expiration time in seconds. Defaults to 3600 (1 hour)
+
+        Returns:
+            str: Presigned upload URL
+
+        Examples:
+            >>> url = client.get_presigned_upload_url("upload.txt")
+            >>> print(url)
+            "https://minio.example.com/bucket/upload.txt?X-Amz-Algorithm=..."
+        """
+        if bucket is None:
+            bucket = self.root_bucket
+        return self._get_presigned_upload_url(key, bucket, expires, *args, **kwargs)
+
+    @abc.abstractmethod
+    def _get_presigned_url(
+        self,
+        key: str,
+        bucket: str,
+        expires: int,
+        *args,
+        **kwargs,
+    ) -> str:
+        """Generate a presigned URL for downloading objects (GET method).
+
+        Args:
+            key (str): Object key name
+            bucket (str): Bucket name
+            expires (int): Expiration time in seconds. Must have a default value.
+
+        Returns:
+            str: Presigned download URL
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _get_presigned_upload_url(
+        self,
+        key: str,
+        bucket: str,
+        expires: int,
+        *args,
+        **kwargs,
+    ) -> str:
+        """Generate a presigned URL for uploading objects (PUT method).
+
+        Args:
+            key (str): Object key name
+            bucket (str): Bucket name
+            expires (int): Expiration time in seconds. Must have a default value.
+
+        Returns:
+            str: Presigned upload URL
+        """
+        raise NotImplementedError
+
     @abc.abstractmethod
     def _put_object_v2(
         self,
