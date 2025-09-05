@@ -386,6 +386,47 @@ class NoSQLStore(abc.ABC):
         """
         raise NotImplementedError
 
+    def count(
+        self, collection: str, filters: dict | None = None, *args, **kwargs
+    ) -> int:
+        """Count documents in a collection
+
+        Args:
+            collection (str): Name of the collection to count documents in
+            filters (dict | None): Query filters to select documents, default is None for counting all
+
+        Returns:
+            int: Count of documents matching the query
+
+        Raises:
+            ValueError: If collection name is empty
+            RuntimeError: If database operation fails
+
+        Examples:
+            >>> total = store.count("users")
+            >>> active_count = store.count("users", {"status": "active"})
+        """
+        return self._count(collection=collection, filters=filters, *args, **kwargs)
+
+    @abc.abstractmethod
+    def _count(
+        self, collection: str, filters: dict | None = None, *args, **kwargs
+    ) -> int:
+        """Abstract method to count documents
+
+        Args:
+            collection (str): Name of the collection to count documents in
+            filters (dict | None): Query filters to select documents, default is None for counting all
+
+        Returns:
+            int: Count of documents matching the query
+
+        Raises:
+            ValueError: If collection name is empty
+            RuntimeError: If database operation fails
+        """
+        raise NotImplementedError
+
 
 class NoSQLStoreComponentFactory(abc.ABC):
     def __init__(
