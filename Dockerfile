@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
-RUN python -m pip install poetry
+RUN python -m pip install poetry==1.8.5
 RUN poetry config virtualenvs.create false
 
 COPY . /app
