@@ -108,7 +108,7 @@ class ObjectStoreClient(abc.ABC):
 
     def upload_object(
         self,
-        file_path: str,
+        file_object: bytes,
         key: str,
         bucket: str = None,
         *args,
@@ -116,7 +116,7 @@ class ObjectStoreClient(abc.ABC):
     ):
         bucket = bucket or self.root_bucket
         return self._upload_object(
-            file_path=file_path,
+            file_object=file_object,
             key=key,
             bucket=bucket,
             *args,
@@ -169,7 +169,7 @@ class ObjectStoreClient(abc.ABC):
     @abc.abstractmethod
     def _upload_object(
         self,
-        file_path: str,
+        file_object: bytes,
         key: str,
         bucket: str,
         *args,

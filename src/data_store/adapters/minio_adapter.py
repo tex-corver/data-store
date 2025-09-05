@@ -115,16 +115,17 @@ class ObjectStoreClient(abstract.ObjectStoreClient):
 
     def _upload_object(
         self,
-        file_path: str,
+        file_object: bytes,
         key: str,
         bucket: str,
         *args,
         **kwargs,
     ):
-        res = self._client.fput_object(
+        res = self._client.put_object(
             bucket_name=bucket,
             object_name=key,
-            file_path=file_path,
+            data=file_object,
+            length=len(file_object),
             *args,
             **kwargs,
         )

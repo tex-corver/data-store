@@ -184,14 +184,14 @@ class ObjectStore:
 
     def upload_object(
         self,
-        file_path: str,
+        file_object: bytes,
         key: str,
         bucket: str = None,
         *args,
         **kwargs,
     ) -> dict[str, Any]:
         return self.client.upload_object(
-            file_path=file_path,
+            file_object=file_object,
             key=key,
             bucket=bucket,
             *args,
