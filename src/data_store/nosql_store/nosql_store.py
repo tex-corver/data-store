@@ -250,6 +250,28 @@ class NoSQLStore:
         """
         return self.client.bulk_delete(collection, filters, *args, **kwargs)
 
+    def count(
+        self, collection: str, filters: dict | None = None, *args, **kwargs
+    ) -> int:
+        """Count documents in a collection
+
+        Args:
+            collection (str): Name of the collection to count documents in
+            filters (dict | None): Query filters to select documents, default is None for all
+
+        Returns:
+            int: Count of documents matching the query
+
+        Raises:
+            ValueError: If collection name is empty
+            RuntimeError: If database operation fails
+
+        Examples:
+            >>> total = store.count("users")
+            >>> active_count = store.count("users", {"active": True})
+        """
+        return self.client.count(collection, filters, *args, **kwargs)
+
     def _init_component_factory(
         self, *args, **kwargs
     ) -> abstract.NoSQLStoreComponentFactory:

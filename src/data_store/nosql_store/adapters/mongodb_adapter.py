@@ -408,6 +408,26 @@ class NoSQLStore(abstract.NoSQLStore):
 
         return total_deleted
 
+    def _count(
+        self, collection: str, filters: dict | None = None, *args, **kwargs
+    ) -> int:
+        """Count documents in a collection
+
+        Args:
+            collection (str): Name of the collection to count documents in
+            filters (dict | None): Query filters to select documents, default is None for all
+
+        Returns:
+            int: Count of documents matching the query
+
+        Raises:
+            ValueError: If collection name is empty
+            RuntimeError: If database operation fails
+        """
+        _collection = self._get_collection(collection)
+        count = _collection.count_documents(filters or {}, *args, **kwargs)
+        return count
+
 
 class NoSQLStoreComponentFactory(abstract.NoSQLStoreComponentFactory):
     """Factory for creating MongoDB NoSQL store clients"""
