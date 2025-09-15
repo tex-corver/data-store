@@ -5,7 +5,7 @@ from typing import Any
 import utils
 
 __all__ = ["NoSQLStore"]
-from data_store.nosql_store import abstract, adapters, configurations, models
+from data_store.nosql_store import abstract, adapters, configurations
 
 logger = logging.getLogger(__file__)
 
@@ -83,6 +83,7 @@ class NoSQLStore:
         collection: str,
         filters: dict | None = None,
         projections: list[str] | None = None,
+        orders: str | None = None,
         skip: int = 0,
         limit: int = 0,
         *args,
@@ -112,6 +113,7 @@ class NoSQLStore:
             collection,
             filters,
             projections,
+            orders,
             skip,
             limit,
             *args,

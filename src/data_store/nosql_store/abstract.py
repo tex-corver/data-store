@@ -2,9 +2,7 @@ import abc
 import logging
 from typing import Any
 
-import utils
-
-from data_store.nosql_store import configurations, models
+from data_store.nosql_store import configurations
 
 logger = logging.getLogger(__file__)
 
@@ -60,6 +58,7 @@ class NoSQLStore(abc.ABC):
         collection: str,
         filters: dict | None = None,
         projections: list[str] | None = None,
+        orders: str | None = None,
         skip: int = 0,
         limit: int = 0,
         *args,
@@ -89,6 +88,7 @@ class NoSQLStore(abc.ABC):
             collection=collection,
             filters=filters,
             projections=projections,
+            orders=orders,
             skip=skip,
             limit=limit,
             *args,
@@ -257,6 +257,7 @@ class NoSQLStore(abc.ABC):
         collection: str,
         filters: dict | None = None,
         projections: list[str] | None = None,
+        orders: str | None = None,
         skip: int = 0,
         limit: int = 0,
         *args,

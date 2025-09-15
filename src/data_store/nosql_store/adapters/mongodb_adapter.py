@@ -7,13 +7,17 @@ import pymongo
 import pymongo.collection
 import pymongo.database
 import pymongo.errors
-import utils
 
-from data_store.nosql_store import abstract, configurations, models
+from data_store.nosql_store import abstract, configurations
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+
+SORT_DIRECTION = {
+    "+": pymongo.ASCENDING,
+    "-": pymongo.DESCENDING,
+}
 
 
 def validate_not_none(
@@ -203,6 +207,7 @@ class NoSQLStore(abstract.NoSQLStore):
         collection: str,
         filters: dict | None = None,
         projections: list[str] | None = None,
+        orders: str | None = None,
         skip: int = 0,
         limit: int = 0,
         *args,
@@ -245,6 +250,11 @@ class NoSQLStore(abstract.NoSQLStore):
             *args,
             **kwargs,
         )
+
+        if orders:
+            orders = orders.split(",")
+            orders = [(order[1:], SORT_DIRECTION[order[0]]) for order in orders]
+            cursor = cursor.sort(orders)
 
         # Convert ObjectId to string for JSON serialization
         documents = []
