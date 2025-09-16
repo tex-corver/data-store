@@ -114,6 +114,42 @@ class TestSingleDocumentOperations:
         assert results[3]["name"] == "Test User 4"  # age 30, weight 60, height 170
         assert results[4]["name"] == "Test User 5"  # age 30, weight 60, height 175
 
+    def test_find_documents_with_single_order(self, mongodb_store):
+        """Test finding documents with a single ordering field."""
+        doc1 = DUMMY_DOCUMENT.copy()
+        doc2 = DUMMY_DOCUMENT_2.copy()
+        doc3 = DUMMY_DOCUMENT_3.copy()
+        mongodb_store.insert(TEST_COLLECTION, doc1)
+        mongodb_store.insert(TEST_COLLECTION, doc2)
+        mongodb_store.insert(TEST_COLLECTION, doc3)
+        results = mongodb_store.find(TEST_COLLECTION, orders="+age")
+        assert len(results) == 3
+        assert results[0]["name"] == "Test User 2"  # age 25
+        assert results[1]["name"] == "Test User 3"  # age 25
+        assert results[2]["name"] == "Test User"  # age 30
+
+    def test_find_documents_with_empty_orders(self, mongodb_store):
+        """Test finding documents with empty orders string."""
+        doc1 = DUMMY_DOCUMENT.copy()
+        doc2 = DUMMY_DOCUMENT_2.copy()
+        mongodb_store.insert(TEST_COLLECTION, doc1)
+        mongodb_store.insert(TEST_COLLECTION, doc2)
+        results = mongodb_store.find(TEST_COLLECTION, orders="")
+        assert len(results) == 2
+        names = {doc["name"] for doc in results}
+        assert names == {"Test User", "Test User 2"}
+
+    def test_find_documents_with_nonexistent_order_field(self, mongodb_store):
+        """Test ordering by a field that does not exist in any document."""
+        doc1 = DUMMY_DOCUMENT.copy()
+        doc2 = DUMMY_DOCUMENT_2.copy()
+        mongodb_store.insert(TEST_COLLECTION, doc1)
+        mongodb_store.insert(TEST_COLLECTION, doc2)
+        results = mongodb_store.find(TEST_COLLECTION, orders="+nonexistent_field")
+        names = {doc["name"] for doc in results}
+        assert names == {"Test User", "Test User 2"}
+        assert len(results) == 2
+
 
 class TestUpdateOperations:
     """Test document update operations with and without upsert."""
