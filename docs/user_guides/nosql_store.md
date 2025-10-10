@@ -111,6 +111,23 @@ num_updated = store.bulk_update("users", {"active": True}, [{"$set": {"last_logi
 num_deleted = store.bulk_delete("users", {"status": "inactive"})
 ```
 
+## Some other Methods
+### Get Frame
+- **Method:** `get_frame(collection: str, data_type: Literal["polars"] = "polars", *args, **kwargs) -> DataFrame`
+- **Description:** Retrieves documents from a collection and returns them as a DataFrame (currently supports Polars).
+- **Example:**
+```python
+df = store.get_frame("users")
+```
+### Count
+- **Method:** `count(collection: str, filters: dict | None = None, *args, **kwargs) -> int`
+- **Description:** Counts the number of documents matching the filter in a collection.
+- **Returns:** Count of matching documents.
+- **Example:**
+```python
+num_docs = store.count("users", {"age": {"$gt": 20}})
+```
+
 ## Error Handling
 
 - Methods may raise a `ValueError` if required parameters are missing or invalid.

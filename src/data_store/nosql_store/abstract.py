@@ -429,7 +429,7 @@ class NoSQLStore(abc.ABC):
 
     def get_frame(
         self, collection: str, data_type: Literal["polars"] = "polars", *args, **kwargs
-    ) -> models.DataFrame:
+    ) -> Any:
         """Retrieve documents as a DataFrame
 
         Args:
@@ -454,7 +454,7 @@ class NoSQLStore(abc.ABC):
     @abc.abstractmethod
     def _get_frame(
         self, collection: str, data_type: Literal["polars"] = "polars", *args, **kwargs
-    ) -> models.DataFrame:
+    ) -> Any:
         """Abstract method to retrieve documents as a DataFrame
 
         Args:

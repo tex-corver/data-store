@@ -430,19 +430,19 @@ class NoSQLStore(abstract.NoSQLStore):
 
     def _get_frame(
         self, collection: str, data_type: Literal["polars"] = "polars", *args, **kwargs
-    ) -> models.DataFrame:
+    ) -> Any:
         # return super()._get_frame(collection, data_type, *args, **kwargs)
         match data_type:
             case "pandas":
                 import pandas as pd  # type: ignore[import]
 
                 df = pd.DataFrame(self.find(collection, *args, **kwargs))
-                return models.DataFrame(data=df, data_type="pandas")
+                return df
             case "polars":
                 import polars as pl  # type: ignore[import]
 
                 df = pl.DataFrame(self.find(collection, *args, **kwargs))
-                return models.DataFrame(data=df, data_type="polars")
+                return df
             case _:
                 raise ValueError(
                     f"Unsupported data_type: {data_type}. Use 'pandas' or 'polars'."
