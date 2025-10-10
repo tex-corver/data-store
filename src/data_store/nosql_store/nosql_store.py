@@ -1,6 +1,6 @@
 import contextlib
 import logging
-from typing import Any
+from typing import Any, Literal
 
 import utils
 
@@ -271,6 +271,27 @@ class NoSQLStore:
             >>> active_count = store.count("users", {"active": True})
         """
         return self.client.count(collection, filters, *args, **kwargs)
+
+    def get_frame(
+        self, collection: str, data_type: Literal["polars"] = "polars", *args, **kwargs
+    ):
+        """Retrieve documents from a collection as a DataFrame
+
+        Args:
+            collection (str): Name of the collection to retrieve documents from
+            data_type (Literal["polars"]): Type of DataFrame to return, default is "polars"
+
+        Returns:
+            DataFrame: DataFrame containing documents from the collection
+
+        Raises:
+            ValueError: If collection name is empty or data_type is unsupported
+            RuntimeError: If database operation fails
+
+        Examples:
+            >>> df = store.get_frame("users")
+        """
+        return self.client.get_frame(collection, data_type, *args, **kwargs)
 
     def _init_component_factory(
         self, *args, **kwargs

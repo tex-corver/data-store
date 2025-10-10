@@ -1,6 +1,6 @@
 import functools
 import logging
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Literal, TypeVar
 
 import bson
 import pymongo
@@ -427,6 +427,26 @@ class NoSQLStore(abstract.NoSQLStore):
         _collection = self._get_collection(collection)
         count = _collection.count_documents(filters or {}, *args, **kwargs)
         return count
+
+    def _get_frame(
+        self, collection: str, data_type: Literal["polars"] = "polars", *args, **kwargs
+    ) -> models.DataFrame:
+        # return super()._get_frame(collection, data_type, *args, **kwargs)
+        match data_type:
+            case "pandas":
+                import pandas as pd  # type: ignore[import]
+
+                df = pd.DataFrame(self.find(collection, *args, **kwargs))
+                return models.DataFrame(data=df, data_type="pandas")
+            case "polars":
+                import polars as pl  # type: ignore[import]
+
+                df = pl.DataFrame(self.find(collection, *args, **kwargs))
+                return models.DataFrame(data=df, data_type="polars")
+            case _:
+                raise ValueError(
+                    f"Unsupported data_type: {data_type}. Use 'pandas' or 'polars'."
+                )
 
 
 class NoSQLStoreComponentFactory(abstract.NoSQLStoreComponentFactory):
