@@ -7,13 +7,17 @@ import pymongo
 import pymongo.collection
 import pymongo.database
 import pymongo.errors
-import utils
 
-from data_store.nosql_store import abstract, configurations, models
+from data_store.nosql_store import abstract, configurations
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+
+SORT_DIRECTION = {
+    "+": pymongo.ASCENDING,
+    "-": pymongo.DESCENDING,
+}
 
 
 def validate_not_none(
@@ -203,6 +207,7 @@ class NoSQLStore(abstract.NoSQLStore):
         collection: str,
         filters: dict | None = None,
         projections: list[str] | None = None,
+        orders: str | None = None,
         skip: int = 0,
         limit: int = 0,
         *args,
@@ -214,6 +219,7 @@ class NoSQLStore(abstract.NoSQLStore):
             collection (str): Collection name
             filters (dict | None): Query filters, default is None for find all
             projections (list[str] | None): Fields to include in results, default is None
+            orders (str | None): Comma-separated field names with '+' or '-' for ascending/descending, e.g. "+field1,-field2", default is None
             skip (int): Number of documents to skip, default is 0
             limit (int): Maximum number of documents to return, default is 0 (no limit)
             *args: Additional positional arguments for pymongo find
@@ -226,7 +232,7 @@ class NoSQLStore(abstract.NoSQLStore):
             ValueError: If collection name is empty
 
         Examples:
-            >>> results = store.find("collection", filters={"field": "value"}, projections=["field1", "field2"], skip=10, limit=5)
+            >>> results = store.find("collection", filters={"field": "value"}, projections=["field1", "field2"], orders="+field1,-field2", skip=10, limit=5)
             >>> all_results = store.find("collection")  # Find all documents in collection
 
         """
@@ -245,6 +251,11 @@ class NoSQLStore(abstract.NoSQLStore):
             *args,
             **kwargs,
         )
+
+        if orders:
+            orders = orders.split(",")
+            orders = [(order[1:], SORT_DIRECTION[order[0]]) for order in orders]
+            cursor = cursor.sort(orders)
 
         # Convert ObjectId to string for JSON serialization
         documents = []

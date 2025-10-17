@@ -2,9 +2,7 @@ import abc
 import logging
 from typing import Any, Literal
 
-import utils
-
-from data_store.nosql_store import configurations, models
+from data_store.nosql_store import configurations
 
 logger = logging.getLogger(__file__)
 
@@ -60,6 +58,7 @@ class NoSQLStore(abc.ABC):
         collection: str,
         filters: dict | None = None,
         projections: list[str] | None = None,
+        orders: str | None = None,
         skip: int = 0,
         limit: int = 0,
         *args,
@@ -71,8 +70,11 @@ class NoSQLStore(abc.ABC):
             collection (str): Collection name
             filters (dict | None): Query filters, default is None for find all
             projections (list[str] | None): Fields to include in results, default is None
+            orders (str | None): Comma-separated field names with '+' or '-' for ascending/descending, e.g. "+field1,-field2", default is None
             skip (int): Number of documents to skip, default is 0
             limit (int): Maximum number of documents to return, default is 0 (no limit)
+            *args: Additional positional arguments for pymongo find
+            **kwargs: Additional keyword arguments for pymongo find
 
         Returns:
             list: List of documents matching the query
@@ -81,7 +83,7 @@ class NoSQLStore(abc.ABC):
             ValueError: If collection name is empty
 
         Examples:
-            >>> results = store.find("collection", filters={"field": "value"}, projections=["field1", "field2"], skip=10, limit=5)
+            >>> results = store.find("collection", filters={"field": "value"}, projections=["field1", "field2"], orders="+field1,-field2", skip=10, limit=5)
             >>> all_results = store.find("collection")  # Find all documents in collection
 
         """
@@ -89,6 +91,7 @@ class NoSQLStore(abc.ABC):
             collection=collection,
             filters=filters,
             projections=projections,
+            orders=orders,
             skip=skip,
             limit=limit,
             *args,
@@ -257,19 +260,23 @@ class NoSQLStore(abc.ABC):
         collection: str,
         filters: dict | None = None,
         projections: list[str] | None = None,
+        orders: str | None = None,
         skip: int = 0,
         limit: int = 0,
         *args,
         **kwargs,
     ) -> list:
-        """Abstract method to find documents
+        """Find documents in a collection
 
         Args:
             collection (str): Collection name
             filters (dict | None): Query filters, default is None for find all
             projections (list[str] | None): Fields to include in results, default is None
+            orders (str | None): Comma-separated field names with '+' or '-' for ascending/descending, e.g. "+field1,-field2", default is None
             skip (int): Number of documents to skip, default is 0
             limit (int): Maximum number of documents to return, default is 0 (no limit)
+            *args: Additional positional arguments for pymongo find
+            **kwargs: Additional keyword arguments for pymongo find
 
         Returns:
             list: List of documents matching the query
