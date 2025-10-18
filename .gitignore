@@ -167,3 +167,6 @@ _build/
 # Sphinx Documentation build
 *_static/
 *_templates/
+
+# VS Code
+.vscode/

@@ -1,0 +1,29 @@
+---
+description: Always attach when Implementing Code (Act/Code MODE)
+globs: *.py
+alwaysApply: true
+---
+
+# Write python code
+- Import each module using the full pathname location of the module. Only file __init__.py is allowed to use relative import
+- Use snake_case for variable and function names.
+- Use CamelCase for class names.
+- Follow PEP 8 style guidelines.
+- Include type hints for function parameters and return types.
+- Write docstrings for all public modules, classes, functions, and methods.
+- Avoid use type from typing because since Python 3.10, built-in types like `dict`, `list`, and `set` can be used directly.     
+    Example: `list_a: list[int] = [1, 2, 3], dict_a: dict[str, int] = {"a": 1, "b": 2}`, ..
+- Do not import functions directly from modules; instead, import the module and use the module name to access the functions.
+    - Example: `import pathlib`, then call `pathlib.Path` ...
+- Follow Google Python Style Guide for coding and documentation.
+- Some library can be use as short hand: polars as pl, pydantic as pdt, pydantic_settings as pdt.
+- Only typing is allowed to import all directly, e.g `from typing import Generator`, others not allowed.
+- Use built-in union operators (e.g., str | None) and list literals (e.g., list[int]) for type hints instead of Optional and List.
+- Follow Single Responsibility principle: each function, class or method have only one responsibility to take care of.
+
+# Team libraries:
+- No need to ask or read the implementation of this libraries: `utils`, `data_store`. They always work properly
+
+# Execute command
+- To run tests, always use command `poetry run pytest`
+- If run tests command, always run the command which cover most tests first. Then run each command for each failed tests.

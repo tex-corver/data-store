@@ -106,7 +106,7 @@ class ObjectStoreClient(abc.ABC):
         for s3_object in objects:
             yield s3_object
 
-    def upload_object(
+    def fupload_object(
         self,
         file_path: str,
         key: str,
@@ -114,8 +114,20 @@ class ObjectStoreClient(abc.ABC):
         *args,
         **kwargs,
     ):
+        """Upload object from file path.
+
+        Args:
+            file_path (str): Path to the file to upload
+            key (str): Object key name
+            bucket (str, optional): Bucket name. Defaults to root_bucket
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+
+        Returns:
+            Any: Upload result from the adapter
+        """
         bucket = bucket or self.root_bucket
-        return self._upload_object(
+        return self._fupload_object(
             file_path=file_path,
             key=key,
             bucket=bucket,
@@ -123,18 +135,62 @@ class ObjectStoreClient(abc.ABC):
             **kwargs,
         )
 
-    def put_object_v2(
+    def upload_object(
         self,
         data: bytes,
         key: str,
-        bucket: str | None = None,
+        bucket: str = None,
+        length: int = -1,
         *args,
         **kwargs,
     ):
+        """Upload object from binary data.
+
+        Args:
+            data (bytes): Binary data to upload
+            key (str): Object key name
+            bucket (str, optional): Bucket name. Defaults to root_bucket
+            length (int, optional): Length of data in bytes. Defaults to -1
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+
+        Returns:
+            Any: Upload result from the adapter
+        """
         bucket = bucket or self.root_bucket
-        return self._put_object_v2(
+        return self._upload_object_binary(
             data=data,
             key=key,
+            bucket=bucket,
+            length=length,
+            *args,
+            **kwargs,
+        )
+
+    def fget_object(
+        self,
+        key: str,
+        file_path: str,
+        bucket: str = None,
+        *args,
+        **kwargs,
+    ):
+        """Download object to file path.
+
+        Args:
+            key (str): Object key name
+            file_path (str): Path to save the downloaded file
+            bucket (str, optional): Bucket name. Defaults to root_bucket
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+
+        Returns:
+            Any: Download result from the adapter
+        """
+        bucket = bucket or self.root_bucket
+        return self._fget_object(
+            key=key,
+            file_path=file_path,
             bucket=bucket,
             *args,
             **kwargs,
@@ -166,17 +222,6 @@ class ObjectStoreClient(abc.ABC):
 
     @abc.abstractmethod
     def _delete_object(self, key: str, bucket: str, *args, **kwargs):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def _download_object(
-        self,
-        key: str,
-        file_path: str,
-        bucket: str,
-        *args,
-        **kwargs,
-    ):
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -307,12 +352,34 @@ class ObjectStoreClient(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _put_object_v2(
+    def _fupload_object(
+        self,
+        file_path: str,
+        key: str,
+        bucket: str,
+        *args,
+        **kwargs,
+    ):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _upload_object_binary(
         self,
         data: bytes,
         key: str,
-        bucket: str | None = None,
+        bucket: str,
         length: int = -1,
+        *args,
+        **kwargs,
+    ):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _fget_object(
+        self,
+        key: str,
+        file_path: str,
+        bucket: str,
         *args,
         **kwargs,
     ):

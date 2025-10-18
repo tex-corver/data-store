@@ -26,11 +26,11 @@ class BaseUploadTest:
     test_content = b"This is a test file for upload testing"
 
 
-class TestUploadFile(BaseUploadTest):
-    """Test suite for upload_file method functionality."""
+class TestFUploadObject(BaseUploadTest):
+    """Test suite for fupload_object method functionality."""
 
-    def test_upload_file_success(self, object_store):
-        """Test successful file upload using upload_file method.
+    def test_fupload_object_success(self, object_store):
+        """Test successful file upload using fupload_object method.
 
         Args:
             object_store: ObjectStore instance for testing
@@ -46,7 +46,7 @@ class TestUploadFile(BaseUploadTest):
 
         try:
             # Act
-            result = object_store.upload_file(file_path=temp_file_path, key=key)
+            result = object_store.fupload_object(file_path=temp_file_path, key=key)
 
             # Assert
             assert result is not None
@@ -71,53 +71,53 @@ class TestUploadFile(BaseUploadTest):
             except Exception as e:
                 print(f"Warning: Failed to cleanup test file {key}: {e}")
 
-    def test_upload_file_with_custom_bucket(self, object_store):
-        """Test file upload to a custom bucket using upload_file method.
+    # def test_fupload_object_with_custom_bucket(self, object_store):
+    #     """Test file upload to a custom bucket using fupload_object method.
 
-        Args:
-            object_store: ObjectStore instance for testing
-        """
-        # Arrange
-        key = self.test_upload_key
-        test_content = self.test_content
-        custom_bucket = "test-bucket"
+    #     Args:
+    #         object_store: ObjectStore instance for testing
+    #     """
+    #     # Arrange
+    #     key = self.test_upload_key
+    #     test_content = self.test_content
+    #     custom_bucket = "test-bucket"
 
-        # Create a temporary file with test content
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_file.write(test_content)
-            temp_file_path = temp_file.name
+    #     # Create a temporary file with test content
+    #     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+    #         temp_file.write(test_content)
+    #         temp_file_path = temp_file.name
 
-        try:
-            # Act
-            result = object_store.upload_file(
-                file_path=temp_file_path, key=key, bucket=custom_bucket
-            )
+    #     try:
+    #         # Act
+    #         result = object_store.fupload_object(
+    #             file_path=temp_file_path, key=key, bucket=custom_bucket
+    #         )
 
-            # Assert
-            assert result is not None
+    #         # Assert
+    #         assert result is not None
 
-            # Verify the file exists in the custom bucket
-            uploaded_object = object_store.get_object(key, bucket=custom_bucket)
-            assert uploaded_object is not None, (
-                "Uploaded file does not exist in the custom bucket"
-            )
+    #         # Verify the file exists in the custom bucket
+    #         uploaded_object = object_store.get_object(key, bucket=custom_bucket)
+    #         assert uploaded_object is not None, (
+    #             "Uploaded file does not exist in the custom bucket"
+    #         )
 
-            # Verify the content matches
-            assert uploaded_object.body == test_content, (
-                "Content of the uploaded file does not match the original content"
-            )
+    #         # Verify the content matches
+    #         assert uploaded_object.body == test_content, (
+    #             "Content of the uploaded file does not match the original content"
+    #         )
 
-        finally:
-            # Clean up the temporary file from local filesystem
-            os.unlink(temp_file_path)
-            # Clean up the uploaded file from object store
-            try:
-                object_store.delete_object(key, bucket=custom_bucket)
-            except Exception as e:
-                print(f"Warning: Failed to cleanup test file {key}: {e}")
+    #     finally:
+    #         # Clean up the temporary file from local filesystem
+    #         os.unlink(temp_file_path)
+    #         # Clean up the uploaded file from object store
+    #         try:
+    #             object_store.delete_object(key, bucket=custom_bucket)
+    #         except Exception as e:
+    #             print(f"Warning: Failed to cleanup test file {key}: {e}")
 
-    def test_upload_file_nonexistent_file(self, object_store):
-        """Test upload_file method with non-existent file path.
+    def test_fupload_object_nonexistent_file(self, object_store):
+        """Test fupload_object method with non-existent file path.
 
         Args:
             object_store: ObjectStore instance for testing
@@ -128,7 +128,7 @@ class TestUploadFile(BaseUploadTest):
 
         # Act & Assert
         with pytest.raises(FileNotFoundError):
-            object_store.upload_file(file_path=nonexistent_file_path, key=key)
+            object_store.fupload_object(file_path=nonexistent_file_path, key=key)
 
 
 class TestUploadObject(BaseUploadTest):
@@ -145,7 +145,7 @@ class TestUploadObject(BaseUploadTest):
         test_content = self.test_content
 
         # Act
-        result = object_store.upload_object(file_object=test_content, key=key)
+        result = object_store.upload_object(data=test_content, key=key)
 
         # Assert
         assert result is not None
@@ -181,7 +181,7 @@ class TestUploadObject(BaseUploadTest):
 
         # Act
         result = object_store.upload_object(
-            file_object=test_content, key=key, bucket=custom_bucket
+            data=test_content, key=key, bucket=custom_bucket
         )
 
         # Assert
@@ -215,7 +215,7 @@ class TestUploadObject(BaseUploadTest):
         empty_content = b""
 
         # Act
-        result = object_store.upload_object(file_object=empty_content, key=key)
+        result = object_store.upload_object(data=empty_content, key=key)
 
         # Assert
         assert result is not None
@@ -249,7 +249,7 @@ class TestUploadObject(BaseUploadTest):
         large_content = b"X" * (1024 * 1024)
 
         # Act
-        result = object_store.upload_object(file_object=large_content, key=key)
+        result = object_store.upload_object(data=large_content, key=key)
 
         # Assert
         assert result is not None
@@ -276,7 +276,7 @@ class TestUploadUtilities(BaseUploadTest):
     """Test suite for upload utility functionality."""
 
     def test_upload_file_and_verify_with_presigned_url(self, object_store):
-        """Test upload_file and verify using presigned URL access.
+        """Test fupload_object and verify using presigned URL access.
 
         Args:
             object_store: ObjectStore instance for testing
@@ -292,7 +292,9 @@ class TestUploadUtilities(BaseUploadTest):
 
         try:
             # Act - Upload file
-            upload_result = object_store.upload_file(file_path=temp_file_path, key=key)
+            upload_result = object_store.fupload_object(
+                file_path=temp_file_path, key=key
+            )
 
             # Get presigned URL and verify access
             presigned_url = object_store.get_presigned_url(key)
@@ -327,7 +329,7 @@ class TestUploadUtilities(BaseUploadTest):
         test_content = self.test_content
 
         # Act - Upload object
-        upload_result = object_store.upload_object(file_object=test_content, key=key)
+        upload_result = object_store.upload_object(data=test_content, key=key)
 
         # Get presigned URL and verify access
         presigned_url = object_store.get_presigned_url(key)

@@ -1,0 +1,90 @@
+# Test Refactoring Instructions
+
+## Overview
+This document provides instructions for refactoring test files following specific patterns and best practices.
+
+## Requirements
+
+### 1. Act-Arrange-Assert Pattern
+All test methods must follow the clear Act-Arrange-Assert structure:
+- **Arrange**: Set up test data and conditions
+- **Act**: Execute the function being tested
+- **Assert**: Verify the results
+
+### 2. Separate Test Categories
+Organize tests into logical classes based on their purpose:
+
+
+### 3. Base Class Implementation
+Create a base class to reduce code duplication:
+- Common setup/teardown logic
+- Shared fixtures
+- Reusable helper methods
+
+### 4. Documentation Standards
+Follow Google Style Guide for all docstrings:
+- Brief description
+- Args section with types
+- Returns section with types
+- Raises section (if applicable)
+- Examples section (if applicable)
+
+## Example Structure
+
+```python
+class BaseTest:
+    """Base class with common setup and teardown."""
+    
+    @pytest.fixture
+    def object_store(self):
+        """Create and configure test instance."""
+        # Setup
+        store = ObjectStore()
+        self.setup_method(store)
+        yield store
+        # Teardown
+        self.teardown_method(store)
+
+    def setup_method(self, store):
+        """Common setup logic."""
+        # Arrange test data
+        pass
+
+    def teardown_method(self, store):
+        """Common teardown logic."""
+        # Clean up test data
+        pass
+
+
+class TestUrlFormat(BaseTest):
+    """Tests for URL format validation."""
+    
+    def test_url_format(self, object_store):
+        """Test URL format with Act-Arrange-Assert pattern."""
+        # Arrange
+        key = "test-key"
+        
+        # Act
+        url = object_store.get_presigned_url(key)
+        
+        # Assert
+        assert url.startswith("http://")
+        assert "X-Amz-Algorithm" in url
+
+
+class TestUtilities(BaseTest):
+    """Tests for utility functionality."""
+    
+    def test_upload_utility(self, object_store):
+        """Test upload functionality with Act-Arrange-Assert pattern."""
+        # Arrange
+        key = "test-key"
+        test_data = b"test content"
+        
+        # Act
+        response = requests.put(url, data=test_data)
+        
+        # Assert
+        assert response.status_code == 200
+        assert object_store.get_object(key) is not None
+```

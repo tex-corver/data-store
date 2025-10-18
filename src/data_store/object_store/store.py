@@ -134,22 +134,6 @@ class ObjectStore:
             **kwargs,
         )
 
-    def download_object(
-        self,
-        key: str,
-        file_path: str = None,
-        bucket: str = None,
-        *args,
-        **kwargs,
-    ) -> Any:
-        return self.client.download_object(
-            key=key,
-            file_path=file_path,
-            bucket=bucket,
-            *args,
-            **kwargs,
-        )
-
     def get_object(
         self,
         key: str,
@@ -182,7 +166,7 @@ class ObjectStore:
         for obj in objects:
             yield obj
 
-    def upload_object(
+    def fupload_object(
         self,
         file_path: str,
         key: str,
@@ -190,7 +174,19 @@ class ObjectStore:
         *args,
         **kwargs,
     ) -> dict[str, Any]:
-        return self.client.upload_object(
+        """Upload object from file path.
+
+        Args:
+            file_path (str): Path to the file to upload
+            key (str): Object key name
+            bucket (str, optional): Bucket name. Defaults to root_bucket
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+
+        Returns:
+            dict[str, Any]: Upload result
+        """
+        return self.client.fupload_object(
             file_path=file_path,
             key=key,
             bucket=bucket,
@@ -198,20 +194,87 @@ class ObjectStore:
             **kwargs,
         )
 
-    def put_object_v2(
+    def upload_object(
         self,
         data: bytes,
         key: str,
-        bucket: str | None = None,
+        bucket: str = None,
         length: int = -1,
         *args,
         **kwargs,
     ) -> dict[str, Any]:
-        return self.client.put_object_v2(
+        """Upload object from binary data.
+
+        Args:
+            data (bytes): Binary data to upload
+            key (str): Object key name
+            bucket (str, optional): Bucket name. Defaults to root_bucket
+            length (int, optional): Length of data in bytes. Defaults to -1
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+
+        Returns:
+            dict[str, Any]: Upload result
+        """
+        return self.client.upload_object(
             data=data,
             key=key,
             bucket=bucket,
             length=length,
+            *args,
+            **kwargs,
+        )
+
+    def fget_object(
+        self,
+        key: str,
+        file_path: str,
+        bucket: str = None,
+        *args,
+        **kwargs,
+    ) -> dict[str, Any]:
+        """Download object to file path.
+
+        Args:
+            key (str): Object key name
+            file_path (str): Path to save the downloaded file
+            bucket (str, optional): Bucket name. Defaults to root_bucket
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+
+        Returns:
+            dict[str, Any]: Download result
+        """
+        return self.client.fget_object(
+            key=key,
+            file_path=file_path,
+            bucket=bucket,
+            *args,
+            **kwargs,
+        )
+
+    def get_object(
+        self,
+        key: str,
+        bucket: str = None,
+        *args,
+        **kwargs,
+    ) -> dict[str, Any]:
+        """Download object from binary data.
+
+        Args:
+            key (str): Object key name
+            file_path (str, optional): Path to save the downloaded file. Defaults to key name
+            bucket (str, optional): Bucket name. Defaults to root_bucket
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+
+        Returns:
+            dict[str, Any]: Download result
+        """
+        return self.client.get_object(
+            key=key,
+            bucket=bucket,
             *args,
             **kwargs,
         )
@@ -289,4 +352,6 @@ class ObjectStore:
             >>> print(url)
             "https://minio.example.com/bucket/upload.txt?X-Amz-Algorithm=..."
         """
-        return self.client.get_presigned_upload_url(key, bucket, expires, *args, **kwargs)
+        return self.client.get_presigned_upload_url(
+            key, bucket, expires, *args, **kwargs
+        )
