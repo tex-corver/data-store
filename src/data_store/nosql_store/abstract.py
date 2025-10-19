@@ -2,7 +2,7 @@ import abc
 import logging
 from typing import Any, Literal
 
-from data_store.nosql_store import configurations
+from data_store.nosql_store import configurations, models
 
 logger = logging.getLogger(__file__)
 
@@ -435,8 +435,12 @@ class NoSQLStore(abc.ABC):
         raise NotImplementedError
 
     def get_frame(
-        self, collection: str, data_type: Literal["polars"] = "polars", *args, **kwargs
-    ) -> Any:
+        self,
+        collection: str,
+        data_type: models.DataFrameType = "polars",
+        *args,
+        **kwargs,
+    ) -> models.DataFrame:
         """Retrieve documents as a DataFrame
 
         Args:
@@ -461,7 +465,7 @@ class NoSQLStore(abc.ABC):
     @abc.abstractmethod
     def _get_frame(
         self, collection: str, data_type: Literal["polars"] = "polars", *args, **kwargs
-    ) -> Any:
+    ) -> models.DataFrame:
         """Abstract method to retrieve documents as a DataFrame
 
         Args:

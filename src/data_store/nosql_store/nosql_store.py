@@ -5,7 +5,7 @@ from typing import Any, Literal
 import utils
 
 __all__ = ["NoSQLStore"]
-from data_store.nosql_store import abstract, adapters, configurations
+from data_store.nosql_store import abstract, adapters, configurations, models
 
 logger = logging.getLogger(__file__)
 
@@ -278,8 +278,12 @@ class NoSQLStore:
         return self.client.count(collection, filters, *args, **kwargs)
 
     def get_frame(
-        self, collection: str, data_type: Literal["polars"] = "polars", *args, **kwargs
-    ):
+        self,
+        collection: str,
+        data_type: models.DataFrameType = "polars",
+        *args,
+        **kwargs,
+    ) -> models.DataFrame:
         """Retrieve documents from a collection as a DataFrame
 
         Args:

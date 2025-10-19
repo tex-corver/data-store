@@ -8,7 +8,7 @@ import pymongo.collection
 import pymongo.database
 import pymongo.errors
 
-from data_store.nosql_store import abstract, configurations
+from data_store.nosql_store import abstract, configurations, models
 
 logger = logging.getLogger(__name__)
 
@@ -441,19 +441,19 @@ class NoSQLStore(abstract.NoSQLStore):
 
     def _get_frame(
         self, collection: str, data_type: Literal["polars"] = "polars", *args, **kwargs
-    ) -> Any:
+    ) -> models.DataFrame:
         # return super()._get_frame(collection, data_type, *args, **kwargs)
         match data_type:
             case "pandas":
                 import pandas as pd  # type: ignore[import]
 
                 df = pd.DataFrame(self.find(collection, *args, **kwargs))
-                return df
+                return models.DataFrame(data=df, data_type="pandas")
             case "polars":
                 import polars as pl  # type: ignore[import]
 
                 df = pl.DataFrame(self.find(collection, *args, **kwargs))
-                return df
+                return models.DataFrame(data=df, data_type="polars")
             case _:
                 raise ValueError(
                     f"Unsupported data_type: {data_type}. Use 'pandas' or 'polars'."
