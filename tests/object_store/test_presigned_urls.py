@@ -28,7 +28,7 @@ def object_store():
 
     try:
         # Upload test file to the object store
-        store.upload_object(file_path=temp_file_path, key=test_key)
+        store.fupload_object(file_path=temp_file_path, key=test_key)
         yield store
     finally:
         # Clean up the temporary file from local filesystem

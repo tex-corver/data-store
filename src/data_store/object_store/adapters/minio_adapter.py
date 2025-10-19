@@ -1,7 +1,7 @@
+import datetime
 import io
 import tempfile
 from typing import Any, Generator, Optional
-import datetime
 
 import minio
 import minio.commonconfig
@@ -83,22 +83,6 @@ class ObjectStoreClient(abstract.ObjectStoreClient):
             bucket_name=bucket,
             object_name=key,
             version_id=version,
-            *args,
-            **kwargs,
-        )
-
-    def _download_object(
-        self,
-        key: str,
-        file_path: str,
-        bucket: str,
-        *args,
-        **kwargs,
-    ):
-        return self._client.fget_object(
-            bucket_name=bucket,
-            object_name=key,
-            file_path=file_path,
             *args,
             **kwargs,
         )
@@ -205,7 +189,24 @@ class ObjectStoreClient(abstract.ObjectStoreClient):
             **kwargs,
         )
 
-    def _put_object_v2(
+    def _fupload_object(
+        self,
+        file_path: str,
+        key: str,
+        bucket: str,
+        *args,
+        **kwargs,
+    ):
+        res = self._client.fput_object(
+            bucket_name=bucket,
+            object_name=key,
+            file_path=file_path,
+            *args,
+            **kwargs,
+        )
+        return res
+
+    def _upload_object_binary(
         self,
         data: bytes,
         key: str,
@@ -224,6 +225,22 @@ class ObjectStoreClient(abstract.ObjectStoreClient):
             **kwargs,
         )
         return res
+
+    def _fget_object(
+        self,
+        key: str,
+        file_path: str,
+        bucket: str,
+        *args,
+        **kwargs,
+    ):
+        return self._client.fget_object(
+            bucket_name=bucket,
+            object_name=key,
+            file_path=file_path,
+            *args,
+            **kwargs,
+        )
 
 
 class ObjectStoreComponentFactory(abstract.ObjectStoreComponentFactory):

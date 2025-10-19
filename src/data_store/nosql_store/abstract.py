@@ -1,8 +1,8 @@
 import abc
 import logging
-from typing import Any
+from typing import Any, Literal
 
-from data_store.nosql_store import configurations
+from data_store.nosql_store import configurations, models
 
 logger = logging.getLogger(__file__)
 
@@ -430,6 +430,53 @@ class NoSQLStore(abc.ABC):
 
         Raises:
             ValueError: If collection name is empty
+            RuntimeError: If database operation fails
+        """
+        raise NotImplementedError
+
+    def get_frame(
+        self,
+        collection: str,
+        data_type: models.DataFrameType = "polars",
+        *args,
+        **kwargs,
+    ) -> models.DataFrame:
+        """Retrieve documents as a DataFrame
+
+        Args:
+            collection (str): Name of the collection to retrieve documents from
+            data_type (Literal["polars"]): Type of DataFrame to return, default is "polars"
+
+        Returns:
+            DataFrame: DataFrame containing the documents
+
+        Raises:
+            ValueError: If collection name is empty or unsupported data_type
+            RuntimeError: If database operation fails
+
+        Examples:
+            >>> df = store.get_frame("users")
+            >>> df = store.get_frame("users", data_type="polars")
+        """
+        return self._get_frame(
+            collection=collection, data_type=data_type, *args, **kwargs
+        )
+
+    @abc.abstractmethod
+    def _get_frame(
+        self, collection: str, data_type: Literal["polars"] = "polars", *args, **kwargs
+    ) -> models.DataFrame:
+        """Abstract method to retrieve documents as a DataFrame
+
+        Args:
+            collection (str): Name of the collection to retrieve documents from
+            data_type (Literal["polars"]): Type of DataFrame to return, default is "polars"
+
+        Returns:
+            DataFrame: DataFrame containing the documents
+
+        Raises:
+            ValueError: If collection name is empty or unsupported data_type
             RuntimeError: If database operation fails
         """
         raise NotImplementedError

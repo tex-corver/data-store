@@ -1,0 +1,93 @@
+# Documentation Instructions
+
+## Overview
+This document provides comprehensive instructions for documenting all functions following Google Style Guide with example code.
+
+## Documentation Standards
+
+### Google Style Guide Format
+All docstrings must follow this structure:
+
+```python
+def function_name(param1: str, param2: int = 0) -> bool:
+    """Brief description of the function.
+
+    Args:
+        param1 (str): Description of parameter 1.
+        param2 (int, optional): Description of parameter 2. Defaults to 0.
+
+    Returns:
+        bool: Description of return value.
+
+    Raises:
+        ValueError: Description of when this exception is raised.
+        RuntimeError: Description of when this exception is raised.
+
+    Examples:
+        >>> result = function_name("example", 5)
+        >>> print(result)
+        True
+    """
+```
+
+### Required Sections
+1. **Brief Description**: One-line summary of the function
+2. **Args**: Detailed parameter descriptions with types
+3. **Returns**: Return value description with type
+4. **Raises**: Exception descriptions (if any)
+5. **Examples**: Working code examples (if applicable)
+
+## Example Documentation Templates
+
+### CRUD Operation Template
+```python
+def insert(self, collection: str, data: dict) -> str:
+    """Insert a document into a collection.
+
+    Args:
+        collection (str): Name of the collection to insert into
+        data (dict): Document data to insert
+
+    Returns:
+        str: ID of the inserted document
+
+    Raises:
+        ValueError: If collection name is empty or data is None
+        RuntimeError: If database operation fails
+
+    Examples:
+        >>> doc_id = store.insert("users", {"name": "John", "age": 30})
+        >>> print(doc_id)
+        "60c72b2f9b1d8e001f8e4cde"
+    """
+```
+
+## Quality Checklist
+
+Before finalizing documentation:
+- [ ] Brief description is clear and concise
+- [ ] All parameters are documented with types
+- [ ] Return value is documented with type
+- [ ] All possible exceptions are documented
+- [ ] Examples are syntactically correct and demonstrate usage
+- [ ] Examples cover common use cases
+- [ ] Documentation follows Google Style Guide format
+- [ ] Type hints are consistent with documentation
+- [ ] Examples match actual function behavior
+
+## Maintenance Guidelines
+
+1. **Keep Documentation Updated**: Update docstrings when function signatures change
+2. **Review Examples**: Ensure examples remain accurate as code evolves
+3. **Consistency**: Maintain consistent terminology and formatting across all docstrings
+4. **Completeness**: Document all public and protected methods
+5. **Testing**: Verify that all examples in docstrings actually work
+
+## Best Practices
+
+1. **Use Present Tense**: Describe what the function does, not what it will do
+2. **Be Specific**: Avoid vague terms like "data" - specify what kind of data
+3. **Include Edge Cases**: Document behavior with empty/null inputs when applicable
+4. **Show Common Patterns**: Examples should demonstrate typical usage patterns
+5. **Document Side Effects**: Clearly state if a function modifies state or has side effects
+6. **Performance Considerations**: Mention performance implications for expensive operations
